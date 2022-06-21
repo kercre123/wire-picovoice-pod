@@ -1,6 +1,8 @@
-# wire-pod
+# wire-picovoice-pod
 
 This repo contains a custom Vector escape pod made from [chipper](https://github.com/digital-dream-labs/chipper) and [vector-cloud](https://github.com/digital-dream-labs/vector-cloud).
+
+This repo is a copy of [wire-pod](https://github.com/kercre123/wire-pod) but instead of using Coqui STT, it uses Picovoice Leopard. Leopard is faster, more accurate, and supports more hardware than Coqui, but it is not a totally local solution (processing is done locally, but it uploads usage to a server). The Coqui STT version will still be developed alongside this.
 
 ## Program Descriptions
 
@@ -112,7 +114,6 @@ General Notes:
 	- Run `./setup.sh` with the 5th and 6th option to change the port, you will need to push files to the bot again.
 - If you want to disable logging from the voice processor, recompile chipper with `debugLogging` in ./chipper/pkg/voice_processors/noop/intent.go set to `false`.
 - Some weather conditions don't match the bot's internal response map, so sometimes Vector won't be able to give you the weather until I make my own response map.
-- You have to speak a little slower than normal for Coqui STT to understand you.
 
 Known Issues:
 
