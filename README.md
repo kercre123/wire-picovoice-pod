@@ -10,10 +10,6 @@ This repo is a copy of [wire-pod](https://github.com/kercre123/wire-pod) but ins
 
 `vector-cloud` - Vector-cloud is the program which runs on Vector himself which uploads the mic stream to a chipper instance. This repo has an older tree of vector-cloud which also does not have the "intent graph" feature and has been modified to allow for a custom CA cert.
 
-## System requirements
-
-A CPU with AVX support is required. Check [https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX)
-
 ## Configuring, building, installing
 
 NOTE: This only works with OSKR-unlocked, Dev-unlocked, or Whiskey robots.

@@ -40,18 +40,6 @@ if [[ ! -d ./chipper ]]; then
    exit 1
 fi
 
-if [[ $1 != "-f" ]]; then
-   if [[ ${ARCH} == "x86_64" ]]; then
-      if [[ "${CPUINFO}" == *"avx"* ]]; then
-         echo "AVX support confirmed."
-      else
-         echo "This CPU does not support AVX. This is required for text to speech. Exiting."
-         echo "If you would like to bypass this, run the script like this: './setup.sh -f'"
-         exit 1
-      fi
-   fi
-fi
-
 echo "Checks have passed!"
 echo
 
