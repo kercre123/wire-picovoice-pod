@@ -86,7 +86,6 @@ Architecture Support:
 
 - amd64/x86_64
 - arm64/aarch64
-- arm32/armv7l
 
 Things wire-picovoice-pod has worked on:
 
