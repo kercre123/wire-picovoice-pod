@@ -252,8 +252,23 @@ function makeSource() {
       echo
       echo "Something may be using port ${port}. Make sure that port is free before you start chipper."
    fi
-   echo
+   function picovoicePrompt() {
+      echo
+      echo "You chose to use the Picovoice API instead of Coqui. This requires an API key."
+      echo "Create an account at https://console.picovoice.ai/, choose the free tier, and enter the API key it gives you."
+      echo
+      read -p "Enter your API key: " picovoiceKey
+      if [[ ! -n ${picovoiceKey} ]]; then
+         echo "You must enter an API key."
+         picovoicePrompt
+      fi
+      if [[ ${picovoiceKey} == "Q" ]]; then
+         exit 0
+      fi
+   }
+   picovoicePrompt
    function weatherPrompt() {
+   echo
    echo "Would you like to setup weather commands? This involves creating a free account at https://www.weatherapi.com/ and putting in your API key."
    echo "Otherwise, placeholder values will be used."
    echo
@@ -310,6 +325,7 @@ function makeSource() {
    else 
       echo "export WEATHERAPI_ENABLED=false" >> source.sh
    fi
+   echo "export LEOPARD_APIKEY=${picovoiceKey}" >> source.sh
    echo "export DEBUG_LOGGING=true" >> source.sh
    cd ..
    echo
