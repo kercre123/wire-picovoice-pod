@@ -121,43 +121,13 @@ function buildChipper() {
       echo
       touch slowsys
    fi
-   echo "This is a no-op until the build issues are figured out. It uses 'go run' for now."
+   #echo "This is a no-op until the build issues are figured out. It uses 'go run' for now."
    echo
    cd ..
 }
 
 function getSTT() {
-   if [[ ! -f ./stt/completed ]]; then
-      echo "Getting STT assets"
-      if [[ -d ./stt ]]; then
-         rm -rf ./stt
-      fi
-      mkdir stt
-      cd stt
-      if [[ ${ARCH} == "x86_64" ]]; then
-         wget -q --show-progress https://github.com/coqui-ai/STT/releases/download/v1.3.0/native_client.tflite.Linux.tar.xz
-         tar -xf native_client.tflite.Linux.tar.xz
-         rm -f ./native_client.tflite.Linux.tar.xz
-      elif [[ ${ARCH} == "aarch64" ]]; then
-         wget -q --show-progress https://github.com/coqui-ai/STT/releases/download/v1.3.0/native_client.tflite.linux.aarch64.tar.xz
-         tar -xf native_client.tflite.linux.aarch64.tar.xz
-         rm -f ./native_client.tflite.linux.aarch64.tar.xz
-      elif [[ ${ARCH} == "armv7l" ]]; then
-         wget -q --show-progress https://github.com/coqui-ai/STT/releases/download/v1.3.0/native_client.tflite.linux.armv7.tar.xz
-         tar -xf native_client.tflite.linux.armv7.tar.xz
-         rm -f ./native_client.tflite.linux.armv7.tar.xz
-      fi
-      echo "Getting STT model..."
-      wget -q --show-progress https://coqui.gateway.scarf.sh/english/coqui/v1.0.0-large-vocab/model.tflite
-      echo "Getting STT scorer..."
-      wget -q --show-progress https://coqui.gateway.scarf.sh/english/coqui/v1.0.0-large-vocab/large_vocabulary.scorer
-      echo
-      touch completed
-      echo "STT assets successfully downloaded!"
-      cd ..
-   else
-      echo "STT assets already there!"
-   fi
+   echo
 }
 
 function IPDNSPrompt() {
@@ -442,7 +412,7 @@ echo "What would you like to do?"
 echo "1: Full Setup (recommended) (builds chipper, gets STT stuff, generates certs, creates source.sh file, and creates server_config.json for your bot"
 echo "2: Just build vic-cloud"
 echo "3: Just build chipper"
-echo "4: Just get STT stuff"
+echo "4: Just get STT stuff (no-op because picovoice branch)"
 echo "5: Just generate certs"
 echo "6: Just create source.sh file and config for bot (also for setting up weather API)"
 echo "If you have done everything you have needed, run './setup.sh scp vectorip path/to/key' to copy the new vic-cloud and server config to Vector."
