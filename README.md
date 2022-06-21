@@ -4,17 +4,17 @@ This repo contains a custom Vector escape pod made from [chipper](https://github
 
 This repo is a copy of [wire-pod](https://github.com/kercre123/wire-pod) but instead of using Coqui STT, it uses Picovoice Leopard. Leopard is faster, more accurate, and supports more hardware than Coqui, but it is not a totally local solution (processing is done locally, but it uploads usage to a server). The Coqui STT version will still be developed alongside this.
 
-## Program Descriptions
+## Program descriptions
 
 `chipper` - Chipper is a program used on Digital Dream Lab's servers which takes in a Vector's voice stream, puts it into a speech-to-text processor, and spits out an intent. This is also likely used on the official escape pod. This repo contains an older tree of chipper which does not have the "intent graph" feature (it caused an error upon every new stream), and it now has a working voice processor.
 
 `vector-cloud` - Vector-cloud is the program which runs on Vector himself which uploads the mic stream to a chipper instance. This repo has an older tree of vector-cloud which also does not have the "intent graph" feature and has been modified to allow for a custom CA cert.
 
-## System Requirements
+## System requirements
 
 A CPU with AVX support is required. Check [https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX)
 
-## Configuring, Building, Installing
+## Configuring, building, installing
 
 NOTE: This only works with OSKR-unlocked, Dev-unlocked, or Whiskey robots.
 
@@ -92,10 +92,10 @@ Architecture Support:
 - arm64/aarch64
 - arm32/armv7l
 
-Things jank-escape-pod Has Worked On:
+Things wire-picovoice-pod has worked on:
 
 - Raspberry Pi 4B+ 4GB RAM with Raspberry Pi OS
-	- Doesn't matter if it is 32-bit or 64-bit
+	- 64-bit only (I think)
 - Raspberry Pi 4B+ 4GB RAM with Manjaro 22.04
 - Nintendo Switch with L4T Ubuntu
 - Desktop with Ryzen 5 3600, 16 GB RAM with Ubuntu 22.04
@@ -105,7 +105,7 @@ Things jank-escape-pod Has Worked On:
 	- [Termux](https://github.com/termux/termux-app) proot-distro: Use Ubuntu, make sure to use a port above 1024 and not the default 443.
 	- Linux Deploy: Works stock, just make sure to choose the arch that matches your device in settings. Also use a bigger image size, at least 3 GB.
 
-General Notes:
+General notes:
 
 - If the architecture is AMD64, the text is processed 4 times so longer phrases get processed fully. Text is only processed once on arm32/arm64 for speed and reliability.
 	- If you are running ARM and you feel like your system is fast enough for regular STT processing, 'sudo rm -f ./chipper/slowsys'
@@ -115,11 +115,11 @@ General Notes:
 - If you want to disable logging from the voice processor, recompile chipper with `debugLogging` in ./chipper/pkg/voice_processors/noop/intent.go set to `false`.
 - Some weather conditions don't match the bot's internal response map, so sometimes Vector won't be able to give you the weather until I make my own response map.
 
-Known Issues:
+Known issues:
 
 - ARM processing is slow until I find a good way to deal with the end of speech on (comparatively) slow hardware.
 
-Current Implemented Actions:
+Current implemented actions:
 
 - Good robot
 - Bad robot
