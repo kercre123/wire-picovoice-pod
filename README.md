@@ -20,7 +20,7 @@ NOTE: This only works with OSKR-unlocked, Dev-unlocked, or Whiskey robots.
 
 ```
 git clone https://github.com/kercre123/wire-picovoice-pod.git
-cd wire-pod
+cd wire-picovoice-pod
 sudo ./setup.sh
 
 # You should be able to just press enter for all of the settings
