@@ -58,29 +58,31 @@ function getPackages() {
       echo "Installing golang binary package"
       mkdir golang
       cd golang
-      if [[ ${ARCH} == "x86_64" ]]; then
-         wget -q --show-progress https://go.dev/dl/go1.18.2.linux-amd64.tar.gz
-         rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.2.linux-amd64.tar.gz
-         export PATH=$PATH:/usr/local/go/bin
-      elif [[ ${ARCH} == "aarch64" ]]; then
-         wget -q --show-progress https://go.dev/dl/go1.18.2.linux-arm64.tar.gz
-         rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.2.linux-arm64.tar.gz
-         export PATH=$PATH:/usr/local/go/bin
-      elif [[ ${ARCH} == "armv7l" ]]; then
-         wget -q --show-progress https://go.dev/dl/go1.18.2.linux-armv6l.tar.gz
-         rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.2.linux-armv6l.tar.gz
-         export PATH=$PATH:/usr/local/go/bin
+      if [[ ! -f /usr/local/go/bin/go ]]; then
+         if [[ ${ARCH} == "x86_64" ]]; then
+            wget -q --show-progress https://go.dev/dl/go1.18.2.linux-amd64.tar.gz
+            rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.2.linux-amd64.tar.gz
+            export PATH=$PATH:/usr/local/go/bin
+         elif [[ ${ARCH} == "aarch64" ]]; then
+            wget -q --show-progress https://go.dev/dl/go1.18.2.linux-arm64.tar.gz
+            rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.2.linux-arm64.tar.gz
+            export PATH=$PATH:/usr/local/go/bin
+         elif [[ ${ARCH} == "armv7l" ]]; then
+            wget -q --show-progress https://go.dev/dl/go1.18.2.linux-armv6l.tar.gz
+            rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.2.linux-armv6l.tar.gz
+            export PATH=$PATH:/usr/local/go/bin
+         fi
+      else
+         echo "Golang already installed."
       fi
       cd ..
       rm -rf golang
    else
       echo "Required packages already gotten."
    fi
-   echo
 }
 
 function buildCloud() {
-   echo
    echo "Installing docker"
    if [[ ${TARGET} == "debian" ]]; then
       apt update -y
@@ -100,22 +102,9 @@ function buildCloud() {
 }
 
 function buildChipper() {
-   echo
    cd chipper
-   if [[ ${ARCH} != "x86_64" ]]; then
-      echo
-      echo "This system is not x86_64. This program will still work, but this system will be considered slow and STT will be done to account for slower hardware."
-      echo "If you feel like this system is fast enough for regular STT processing, run: sudo rm -f ./chipper/slowsys"
-      echo
-      touch slowsys
-   fi
    #echo "This is a no-op until the build issues are figured out. It uses 'go run' for now."
-   echo
    cd ..
-}
-
-function getSTT() {
-   echo
 }
 
 function IPDNSPrompt() {
@@ -130,6 +119,7 @@ function IPDNSPrompt() {
 
 function IPPrompt() {
    IPADDRESS=$(ip -4 addr | grep $(ip addr | awk '/state UP/ {print $2}' | sed 's/://g') | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+   echo
    read -p "Enter the IP address of the machine you are running this script on (${IPADDRESS}): " ipaddress
    if [[ ! -n ${ipaddress} ]]; then
       address=${IPADDRESS}
@@ -311,7 +301,7 @@ function scpToBot() {
       exit 0
    fi
    if [[ ! -f ./certs/server_config.json ]]; then
-      echo "server_config.json file missing. You need to generate this file with ./setup.sh's 6th option."
+      echo "server_config.json file missing. You need to generate this file with ./setup.sh's 5th option."
       exit 0
    fi
    if [[ ! -n ${keyPath} ]]; then
@@ -371,14 +361,13 @@ function scpToBot() {
 function firstPrompt() {
    read -p "Enter a number (1): " yn
    case $yn in
-      "1" ) echo; getPackages; getSTT; generateCerts; buildChipper; makeSource; echo "Everything is done! To copy everything needed to your bot, run this script like this:"; echo "Usage: sudo ./setup.sh scp <vector's ip> <path/to/ssh-key>"; echo "Example: sudo ./setup.sh scp 192.168.1.150 /home/wire/id_rsa_Vector-R2D2"; echo; echo "If your Vector is on Wire's custom software or you have an old dev build, you can run this command without an SSH key:"; echo "Example: sudo ./setup.sh scp 192.168.1.150"; echo ;;
+      "1" ) echo; getPackages; generateCerts; buildChipper; makeSource; echo "Everything is done! To copy everything needed to your bot, run this script like this:"; echo "Usage: sudo ./setup.sh scp <vector's ip> <path/to/ssh-key>"; echo "Example: sudo ./setup.sh scp 192.168.1.150 /home/wire/id_rsa_Vector-R2D2"; echo; echo "If your Vector is on Wire's custom software or you have an old dev build, you can run this command without an SSH key:"; echo "Example: sudo ./setup.sh scp 192.168.1.150"; echo ;;
       "2" ) echo; getPackages; buildCloud;;
       "3" ) echo; getPackages; buildChipper;;
-      "4" ) echo; rm -f ./stt/completed; getSTT;;
-      "5" ) echo; getPackages; generateCerts;;
-      "6" ) echo; makeSource;;
-      "" ) echo; getPackages; getSTT; generateCerts; buildChipper; makeSource; echo "Everything is done! To copy everything needed to your bot, run this script like this:"; echo "Usage: sudo ./setup.sh scp <vector's ip> <path/to/ssh-key>"; echo "Example: sudo ./setup.sh scp 192.168.1.150 /home/wire/id_rsa_Vector-R2D2"; echo; echo "If your Vector is on Wire's custom software or you have an old dev build, you can run this command without an SSH key:"; echo "Example: sudo ./setup.sh scp 192.168.1.150"; echo ;;
-      * ) echo "Please answer with 1, 2, 3, 4, 5, 6, or just press enter with no input for 1."; firstPrompt;;
+      "4" ) echo; getPackages; generateCerts;;
+      "5" ) echo; makeSource;;
+      "" ) echo; getPackages; generateCerts; buildChipper; makeSource; echo "Everything is done! To copy everything needed to your bot, run this script like this:"; echo "Usage: sudo ./setup.sh scp <vector's ip> <path/to/ssh-key>"; echo "Example: sudo ./setup.sh scp 192.168.1.150 /home/wire/id_rsa_Vector-R2D2"; echo; echo "If your Vector is on Wire's custom software or you have an old dev build, you can run this command without an SSH key:"; echo "Example: sudo ./setup.sh scp 192.168.1.150"; echo ;;
+      * ) echo "Please answer with 1, 2, 3, 4, 5, or just press enter with no input for 1."; firstPrompt;;
    esac
 }
 
@@ -400,9 +389,8 @@ echo "What would you like to do?"
 echo "1: Full Setup (recommended) (builds chipper, gets STT stuff, generates certs, creates source.sh file, and creates server_config.json for your bot"
 echo "2: Just build vic-cloud"
 echo "3: Just build chipper"
-echo "4: Just get STT stuff (no-op because picovoice branch)"
-echo "5: Just generate certs"
-echo "6: Just create source.sh file and config for bot (also for setting up weather API)"
+echo "4: Just generate certs"
+echo "5: Just create source.sh file and config for bot (also for setting up weather API)"
 echo "If you have done everything you have needed, run './setup.sh scp vectorip path/to/key' to copy the new vic-cloud and server config to Vector."
 echo
 firstPrompt

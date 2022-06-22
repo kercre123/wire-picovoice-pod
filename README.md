@@ -90,6 +90,7 @@ Architecture Support:
 Things wire-picovoice-pod has worked on:
 
 - Raspberry Pi 4B+ 4GB RAM with Raspberry Pi OS
+	- Recommended platform, very fast
 	- 64-bit only (I think)
 - Raspberry Pi 4B+ 4GB RAM with Manjaro 22.04
 - Nintendo Switch with L4T Ubuntu
@@ -102,17 +103,10 @@ Things wire-picovoice-pod has worked on:
 
 General notes:
 
-- If the architecture is AMD64, the text is processed 4 times so longer phrases get processed fully. Text is only processed once on arm32/arm64 for speed and reliability.
-	- If you are running ARM and you feel like your system is fast enough for regular STT processing, 'sudo rm -f ./chipper/slowsys'
-	- If you are running AMD64 and you feel like your system is too slow for regular STT processing, `touch ./chipper/slowsys'
 - If you get this error when running chipper, you are using a port that is being taken up by a program already: `panic: runtime error: invalid memory address or nil pointer dereference`
 	- Run `./setup.sh` with the 5th and 6th option to change the port, you will need to push files to the bot again.
 - If you want to disable logging from the voice processor, recompile chipper with `debugLogging` in ./chipper/pkg/voice_processors/noop/intent.go set to `false`.
-- Some weather conditions don't match the bot's internal response map, so sometimes Vector won't be able to give you the weather until I make my own response map.
-
-Known issues:
-
-- ARM processing is slow until I find a good way to deal with the end of speech on (comparatively) slow hardware.
+	- Currently doesn't work
 
 Current implemented actions:
 

@@ -14,7 +14,7 @@ import (
 )
 
 // set false for no warning
-const warnIfNoSTT string = "true"
+const warnIfNoSTT string = "false"
 
 func main() {
 	log.SetJSONFormat("2006-01-02 15:04:05")

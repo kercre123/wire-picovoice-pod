@@ -42,10 +42,6 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 			debugLogging = false
 		}
 	}
-	if _, err := os.Stat("./slowsys"); err == nil {
-		log.Println("slowsys file found. This will cause processing to be slower but more reliable.")
-		slowSys = true
-	}
 	botNumKG = botNumKG + 1
 	if debugLogging == true {
 		log.Println("Stream " + strconv.Itoa(botNumKG) + " opened.")
@@ -124,73 +120,65 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 				break
 			}
 		}
-		if slowSys == false {
-			if transcription2 != "" {
-				if transcription1 == transcription2 {
-					log.Println("Bot " + strconv.Itoa(botNumKG) + ", " + "Speech stopped, 2: " + transcription1)
-					transcribedText = transcription1
+		if transcription2 != "" {
+			if transcription1 == transcription2 {
+				log.Println("Bot " + strconv.Itoa(botNumKG) + ", " + "Speech stopped, 2: " + transcription1)
+				transcribedText = transcription1
+				die = true
+				break
+			} else if transcription2 != "" {
+				if transcription2 == transcription3 {
+					log.Println("Bot " + strconv.Itoa(botNumKG) + ", " + "Speech stopped, 3: " + transcription2)
+					transcribedText = transcription2
 					die = true
 					break
-				} else if transcription2 != "" {
-					if transcription2 == transcription3 {
-						log.Println("Bot " + strconv.Itoa(botNumKG) + ", " + "Speech stopped, 3: " + transcription2)
-						transcribedText = transcription2
+				} else if transcription3 != "" {
+					if transcription3 == transcription4 {
+						log.Println("Bot " + strconv.Itoa(botNumKG) + ", " + "Speech stopped, 4: " + transcription3)
+						transcribedText = transcription3
 						die = true
 						break
-					} else if transcription3 != "" {
+					} else if transcription4 != "" {
 						if transcription3 == transcription4 {
-							log.Println("Bot " + strconv.Itoa(botNumKG) + ", " + "Speech stopped, 4: " + transcription3)
-							transcribedText = transcription3
+							log.Println("Bot " + strconv.Itoa(botNumKG) + ", " + "Speech stopped, 4: " + transcription4)
+							transcribedText = transcription4
 							die = true
 							break
-						} else if transcription4 != "" {
-							if transcription3 == transcription4 {
-								log.Println("Bot " + strconv.Itoa(botNumKG) + ", " + "Speech stopped, 4: " + transcription4)
-								transcribedText = transcription4
-								die = true
-								break
-							} else {
-								log.Println("Bot " + strconv.Itoa(botNumKG) + ", " + "Speech stopped, 4 (nm): " + transcription4)
-								transcribedText = transcription4
-								die = true
-								break
-							}
+						} else {
+							log.Println("Bot " + strconv.Itoa(botNumKG) + ", " + "Speech stopped, 4 (nm): " + transcription4)
+							transcribedText = transcription4
+							die = true
+							break
 						}
 					}
 				}
 			}
-			if transcription2 == "" && transcription3 != "" {
-				if transcription4 != "" {
-					if transcription3 == transcription4 {
-						log.Println("Speech stopped, 4: " + transcription4)
-						transcribedText = transcription4
-						die = true
-						break
-					} else {
-						log.Println("Speech stopped, 4 (nm): " + transcription4)
-						transcribedText = transcription4
-						die = true
-						break
-					}
+		}
+		if transcription2 == "" && transcription3 != "" {
+			if transcription4 != "" {
+				if transcription3 == transcription4 {
+					log.Println("Speech stopped, 4: " + transcription4)
+					transcribedText = transcription4
+					die = true
+					break
+				} else {
+					log.Println("Speech stopped, 4 (nm): " + transcription4)
+					transcribedText = transcription4
+					die = true
+					break
 				}
 			}
-			if transcription3 == "" && transcription4 != "" {
-				log.Println("Speech stopped, 4 (nm): " + transcription4)
-				transcribedText = transcription4
-				die = true
-				break
-			}
-			if transcription4 == "" && successMatch == true {
-				transcribedText = ""
-				die = true
-				break
-			}
-		} else {
-			if transcription4 != "" {
-				transcribedText = transcription4
-				die = true
-				break
-			}
+		}
+		if transcription3 == "" && transcription4 != "" {
+			log.Println("Speech stopped, 4 (nm): " + transcription4)
+			transcribedText = transcription4
+			die = true
+			break
+		}
+		if transcription4 == "" && successMatch == true {
+			transcribedText = ""
+			die = true
+			break
 		}
 		data = append(data, chunk.InputAudio...)
 		micData = bytesToInt(stream, data, die)
