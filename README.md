@@ -19,7 +19,7 @@ NOTE: This only works with OSKR-unlocked, Dev-unlocked, or Whiskey robots.
 (This currently only works on Arch or Debian-based Linux)
 
 ```
-git clone https://github.com/kercre123/wire-pod.git
+git clone https://github.com/kercre123/wire-picovoice-pod.git
 cd wire-pod
 sudo ./setup.sh
 
