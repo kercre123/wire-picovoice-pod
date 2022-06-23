@@ -30,6 +30,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 	var processingThree bool = false
 	var processingFour bool = false
 	var transcribedText string
+	var isOpus bool
 	var micData []int16
 	var die bool = false
 	if os.Getenv("DEBUG_LOGGING") != "true" && os.Getenv("DEBUG_LOGGING") != "false" {
@@ -48,9 +49,18 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 	}
 	data := []byte{}
 	data = append(data, req.FirstReq.InputAudio...)
+	if len(data) > 0 {
+		if data[0] == 0x4f {
+			isOpus = true
+			log.Println("Bot " + strconv.Itoa(botNum) + " Stream Type: Opus")
+		} else {
+			isOpus = false
+			log.Println("Bot " + strconv.Itoa(botNum) + " Stream Type: PCM")
+		}
+	}
 	stream := opus.OggStream{}
 	go func() {
-		time.Sleep(time.Millisecond * 500)
+		time.Sleep(time.Millisecond * 700)
 		for voiceTimer < 7 {
 			voiceTimer = voiceTimer + 1
 			time.Sleep(time.Second * 1)
@@ -181,7 +191,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 			break
 		}
 		data = append(data, chunk.InputAudio...)
-		micData = bytesToInt(stream, data, die)
+		micData = bytesToInt(stream, data, die, isOpus)
 	}
 	NoResultSpoken = "This is a placeholder! You said: " + transcribedText
 	kg := pb.KnowledgeGraphResponse{

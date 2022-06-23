@@ -29,8 +29,8 @@ var wheelieList = []string{"pop a w", "polwhele", "olwen", "i wieland", "do a wh
 var fistbumpList = []string{"this pomp", "this pump", "bump", "fistb", "fistf", "this book", "pisto", "with pomp",
 	"fison", "first", "fifth", "were fifteen", "if bump", "wisdom", "this bu"}
 var blackjackList = []string{"black", "cards", "game"}
-var affirmativeList = []string{"yes", "correct", "hit"}
-var negativeList = []string{"no", "dont", "stand"}
+var affirmativeList = []string{"yes", "correct"}
+var negativeList = []string{"no", "dont"}
 var photoList = []string{"photo", "foto", "selby", "capture", "picture"}
 var praiseList = []string{"good", "awesome", "also", "as some", "of them", "battle", "t rob", "the ro", "amazing", "woodcourt"}
 var abuseList = []string{"bad", "that ro", "ad ro", "a root", "hate", "horrible"}
@@ -59,6 +59,8 @@ var findCubeList = []string{"your cu", "the cu"}
 var trickList = []string{"trick", "something cool", "some thing cool"}
 var recordMessageList = []string{"record"}
 var playMessageList = []string{"play message", "play method", "play a message", "play a method"}
+var blackjackHitList = []string{"hit", "it", "hot"}
+var blackjackStandList = []string{"stand", "stan"}
 
 // make sure intentsList perfectly matches up with matchListList
 
@@ -75,7 +77,7 @@ var intentsList = []string{"intent_names_username_extend", "intent_names_ask", "
 	"intent_knowledge_promptquestion", "intent_clock_checktimer", "intent_global_stop_extend", "intent_clock_settimer_extend",
 	"intent_clock_time", "intent_imperative_quiet", "intent_imperative_dance", "intent_play_pickupcube",
 	"intent_imperative_fetchcube", "intent_imperative_findcube", "intent_play_anytrick", "intent_message_recordmessage_extend",
-	"intent_message_playmessage_extend"}
+	"intent_message_playmessage_extend", "intent_blackjack_hit", "intent_blackjack_stand"}
 
 var matchListList = [][]string{meetVictorList, nameAskList, eyeColorList, howOldList, exploreStartList,
 	chargerList, sleepList, morningList, nightList, byeList,
@@ -85,4 +87,4 @@ var matchListList = [][]string{meetVictorList, nameAskList, eyeColorList, howOld
 	backupList, volumeDownList, volumeUpList, lookAtMeList, volumeSpecificList,
 	shutUpList, helloList, comeList, loveList, questionList, checkTimerList, stopTimerList,
 	timerList, timeList, quietList, danceList, pickUpList, fetchCubeList, findCubeList, trickList,
-	recordMessageList, playMessageList}
+	recordMessageList, playMessageList, blackjackHitList, blackjackStandList}

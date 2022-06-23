@@ -63,6 +63,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 	var processingThree bool = false
 	var processingFour bool = false
 	var transcribedText string
+	var isOpus bool
 	var micData []int16
 	var die bool = false
 	if os.Getenv("DEBUG_LOGGING") != "true" && os.Getenv("DEBUG_LOGGING") != "false" {
@@ -84,12 +85,25 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 	}
 	data := []byte{}
 	data = append(data, req.FirstReq.InputAudio...)
+	if len(data) > 0 {
+		if data[0] == 0x4f {
+			isOpus = true
+			log.Println("Bot " + strconv.Itoa(botNum) + " Stream Type: Opus")
+		} else {
+			isOpus = false
+			log.Println("Bot " + strconv.Itoa(botNum) + " Stream Type: PCM")
+		}
+	}
 	stream := opus.OggStream{}
 	go func() {
-		time.Sleep(time.Millisecond * 500)
+		if isOpus == true {
+			time.Sleep(time.Millisecond * 300)
+		} else {
+			time.Sleep(time.Millisecond * 1100)
+		}
 		for voiceTimer < 7 {
 			voiceTimer = voiceTimer + 1
-			time.Sleep(time.Millisecond * 800)
+			time.Sleep(time.Millisecond * 700)
 		}
 	}()
 	go func() {
@@ -218,9 +232,9 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 			break
 		}
 		data = append(data, chunk.InputAudio...)
-		micData = bytesToInt(stream, data, die)
+		micData = bytesToInt(stream, data, die, isOpus)
 	}
-	successMatched := processTextAll(req, transcribedText, matchListList, intentsList)
+	successMatched := processTextAll(req, transcribedText, matchListList, intentsList, isOpus)
 	if successMatched == 0 {
 		if debugLogging == true {
 			log.Println("No intent was matched.")

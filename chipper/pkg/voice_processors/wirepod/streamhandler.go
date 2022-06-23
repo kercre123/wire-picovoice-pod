@@ -67,13 +67,21 @@ func bytesToSamples(buf []byte) []int16 {
 	return samples
 }
 
-func bytesToInt(stream opus.OggStream, data []byte, die bool) []int16 {
+func bytesToInt(stream opus.OggStream, data []byte, die bool, isOpus bool) []int16 {
+	// detect if data is pcm or opus
 	if die == true {
 		return nil
 	}
-	n, err := stream.Decode(data)
-	if err != nil {
-		log.Println(err)
+	if isOpus == true {
+		// opus
+		n, err := stream.Decode(data)
+		if err != nil {
+			log.Println(err)
+		}
+		return bytesToSamples(n)
+	} else {
+		// pcm
+		return bytesToSamples(data)
 	}
-	return bytesToSamples(n)
+	return nil
 }
