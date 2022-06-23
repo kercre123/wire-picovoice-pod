@@ -365,6 +365,18 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 		intentParam = "entity_behavior"
 		intentParamValue = "roll_cube"
 		intentParams = map[string]string{intentParam: intentParamValue}
+	} else if strings.Contains(intent, "intent_imperative_praise") {
+		isParam = false
+		newIntent = "intent_imperative_affirmative"
+		intentParam = ""
+		intentParamValue = ""
+		intentParams = map[string]string{intentParam: intentParamValue}
+	} else if strings.Contains(intent, "intent_imperative_abuse") {
+		isParam = false
+		newIntent = "intent_imperative_negative"
+		intentParam = ""
+		intentParamValue = ""
+		intentParams = map[string]string{intentParam: intentParamValue}
 	} else {
 		newIntent = intent
 		intentParam = ""
