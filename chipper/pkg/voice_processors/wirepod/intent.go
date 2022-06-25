@@ -97,13 +97,13 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 	stream := opus.OggStream{}
 	go func() {
 		if isOpus == true {
-			time.Sleep(time.Millisecond * 300)
+			time.Sleep(time.Millisecond * 500)
 		} else {
 			time.Sleep(time.Millisecond * 1100)
 		}
 		for voiceTimer < 7 {
 			voiceTimer = voiceTimer + 1
-			time.Sleep(time.Millisecond * 700)
+			time.Sleep(time.Millisecond * 750)
 		}
 	}()
 	go func() {

@@ -25,7 +25,7 @@ var turnLeftList = []string{"rn left", "go left", "e left", "ed left", "ernest"}
 var turnRightList = []string{"rn right", "go right", "e right", "ernie", "credit", "ed right"}
 var rollCubeList = []string{"roll cu", "roll your cu", "all your cu", "roll human", "yorke", "old your he"}
 var wheelieList = []string{"pop a w", "polwhele", "olwen", "i wieland", "do a wheel", "doorstone", "thibetan", "powell",
-	"welst", "a wheel"}
+	"welst", "a wheel", "willie", "a really", "o' billy"}
 var fistbumpList = []string{"this pomp", "this pump", "bump", "fistb", "fistf", "this book", "pisto", "with pomp",
 	"fison", "first", "fifth", "were fifteen", "if bump", "wisdom", "this bu"}
 var blackjackList = []string{"black", "cards", "game"}
@@ -36,7 +36,7 @@ var praiseList = []string{"good", "awesome", "also", "as some", "of them", "batt
 var abuseList = []string{"bad", "that ro", "ad ro", "a root", "hate", "horrible"}
 var weatherList = []string{"weather", "whether", "the other", "the water"}
 var apologizeList = []string{"sorry", "apologize", "apologise", "the tory"}
-var backupList = []string{"back", "a way", "away"}
+var backupList = []string{"back"}
 var volumeDownList = []string{"all you down", "volume down", "down volume", "down the volume", "quieter"}
 var volumeUpList = []string{"all you up", "volume up", "up volume", "up the volume", "louder"}
 var lookAtMeList = []string{"stare", "at me"}
@@ -61,6 +61,7 @@ var recordMessageList = []string{"record"}
 var playMessageList = []string{"play message", "play method", "play a message", "play a method"}
 var blackjackHitList = []string{"hit", "it", "hot"}
 var blackjackStandList = []string{"stand", "stan"}
+var keepawayList = []string{"keepaway", "keep away"}
 
 // make sure intentsList perfectly matches up with matchListList
 
@@ -77,7 +78,7 @@ var intentsList = []string{"intent_names_username_extend", "intent_names_ask", "
 	"intent_knowledge_promptquestion", "intent_clock_checktimer", "intent_global_stop_extend", "intent_clock_settimer_extend",
 	"intent_clock_time", "intent_imperative_quiet", "intent_imperative_dance", "intent_play_pickupcube",
 	"intent_imperative_fetchcube", "intent_imperative_findcube", "intent_play_anytrick", "intent_message_recordmessage_extend",
-	"intent_message_playmessage_extend", "intent_blackjack_hit", "intent_blackjack_stand"}
+	"intent_message_playmessage_extend", "intent_blackjack_hit", "intent_blackjack_stand", "intent_play_keepaway"}
 
 var matchListList = [][]string{meetVictorList, nameAskList, eyeColorList, howOldList, exploreStartList,
 	chargerList, sleepList, morningList, nightList, byeList,
@@ -87,4 +88,4 @@ var matchListList = [][]string{meetVictorList, nameAskList, eyeColorList, howOld
 	backupList, volumeDownList, volumeUpList, lookAtMeList, volumeSpecificList,
 	shutUpList, helloList, comeList, loveList, questionList, checkTimerList, stopTimerList,
 	timerList, timeList, quietList, danceList, pickUpList, fetchCubeList, findCubeList, trickList,
-	recordMessageList, playMessageList, blackjackHitList, blackjackStandList}
+	recordMessageList, playMessageList, blackjackHitList, blackjackStandList, keepawayList}

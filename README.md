@@ -10,15 +10,16 @@ This repo is a copy of [wire-pod](https://github.com/kercre123/wire-pod) but ins
 
 `vector-cloud` - Vector-cloud is the program which runs on Vector himself which uploads the mic stream to a chipper instance. This repo has an older tree of vector-cloud which also does not have the "intent graph" feature and has been modified to allow for a custom CA cert.
 
-## Configuring, building, installing
+## Configuring, installing, running
 
-NOTE: This only works with OSKR-unlocked, Dev-unlocked, or Whiskey robots.
+NOTE: This only works with OSKR-unlocked, Dev-unlocked, or Whiskey robots running VicOS version 1.4 and above.
 
 ### Linux
 
 (This currently only works on Arch or Debian-based Linux)
 
 ```
+cd ~
 git clone https://github.com/kercre123/wire-picovoice-pod.git
 cd wire-picovoice-pod
 sudo ./setup.sh
@@ -40,7 +41,7 @@ Example:
 
 `sudo ./setup.sh scp 192.168.1.150`
 
-The bot should now be configured to communicate with your server.
+The bot should now be configured to communicate with your server. You do not need to restart the bot to start using voice commands with the new server environment, but you will need to restart him at some point for weather commands to be reliable.
 
 To start chipper, run:
 
@@ -74,6 +75,15 @@ sudo ./start.sh
 
 
 After all of that, try a voice command.
+
+## Configure specific bots
+
+`./chipper/botSetup.sh` is there to help configure specific bots. This is not required for operation, and is there only if you have multiple users using your instance of wire-picovoice-pod and you would like to use different locations/units for weather. It also helps chipper know if a bot is on an older version of VicOS and accounts for it. This is only a stand-in until jdocs and stuff get implemented.
+
+```
+Usage: ./chipper/botSetup.sh <esn> <firmware-prefix> "<location>" <units>
+Example: ./chipper/botSetup.sh 0060059b 1.8 "Des Moines, Iowa" F
+```
 
 ## Status
 
@@ -171,6 +181,8 @@ Current implemented actions:
 	- Enable `Messaging` feature in webViz Features tab
 - Play a message for <name>
 	- Enable `Messaging` feature in webViz Features tab
+- Play keepaway
+	- This may only be a feature in 1.5 and lower
 
 ## Credits
 

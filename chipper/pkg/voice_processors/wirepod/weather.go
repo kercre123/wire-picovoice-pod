@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func getWeather(location string) (string, string, string, string, string, string) {
+func getWeather(location string, botUnits string) (string, string, string, string, string, string) {
 	/*
 		This is where you would make a call to a weather API to get the weather.
 		You are given `location` which` is the location parsed from the speech
@@ -49,13 +49,22 @@ func getWeather(location string) (string, string, string, string, string, string
 		}
 	}
 	if weatherEnabled == true {
-		if weatherAPIUnit != "F" && weatherAPIUnit != "C" {
+		if botUnits != "" {
+			if botUnits == "F" {
+				log.Println("Weather units set to F")
+				weatherAPIUnit = "F"
+			} else if botUnits == "C" {
+				log.Println("Weather units set to C")
+				weatherAPIUnit = "C"
+			}
+		} else if weatherAPIUnit != "F" && weatherAPIUnit != "C" {
 			if debugLogging == true {
 				log.Println("Weather API unit not set, using F")
 			}
 			weatherAPIUnit = "F"
 		}
 	}
+
 	if weatherEnabled == true {
 		params := url.Values{}
 		params.Add("key", weatherAPIKey)
@@ -113,7 +122,7 @@ func getWeather(location string) (string, string, string, string, string, string
 	return condition, is_forecast, local_datetime, speakable_location_string, temperature, temperature_unit
 }
 
-func weatherParser(speechText string) (string, string, string, string, string, string) {
+func weatherParser(speechText string, botLocation string, botUnits string) (string, string, string, string, string, string) {
 	var specificLocation bool
 	var apiLocation string
 	var speechLocation string
@@ -140,10 +149,9 @@ func weatherParser(speechText string) (string, string, string, string, string, s
 	if specificLocation == true {
 		apiLocation = speechLocation
 	} else {
-		// jdocs needs to be implemented
-		apiLocation = "San Francisco"
+		apiLocation = botLocation
 	}
 	// call to weather API
-	condition, is_forecast, local_datetime, speakable_location_string, temperature, temperature_unit := getWeather(apiLocation)
+	condition, is_forecast, local_datetime, speakable_location_string, temperature, temperature_unit := getWeather(apiLocation, botUnits)
 	return condition, is_forecast, local_datetime, speakable_location_string, temperature, temperature_unit
 }

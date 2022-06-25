@@ -1,7 +1,9 @@
 package wirepod
 
 import (
+	"encoding/json"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
@@ -13,6 +15,71 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string) {
 	var newIntent string
 	var isParam bool
 	var intentParams map[string]string
+	var botLocation string = "San Francisco"
+	var botUnits string = "F"
+	var botPlaySpecific bool = false
+	if _, err := os.Stat("./botConfigs/" + req.Device + ".json"); err == nil {
+		log.Println("Found bot config file for " + req.Device)
+		botConfigByte, err := os.ReadFile("./botConfigs/" + req.Device + ".json")
+		if err != nil {
+			log.Println(err)
+		}
+		type botConfigJSON struct {
+			Location        string `json:"location"`
+			Units           string `json:"units"`
+			UsePlaySpecific bool   `json:"use_play_specific"`
+		}
+		var botConfJSON botConfigJSON
+		json.Unmarshal(botConfigByte, &botConfJSON)
+		botLocation = botConfJSON.Location
+		botUnits = botConfJSON.Units
+		botPlaySpecific = botConfJSON.UsePlaySpecific
+	}
+	if botPlaySpecific == true {
+		if strings.Contains(intent, "intent_play_blackjack") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "blackjack"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_fistbump") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "fist_bump"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_rollcube") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "roll_cube"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_popawheelie") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "pop_a_wheelie"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_pickupcube") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "pick_up_cube"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_keepaway") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "keep_away"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else {
+			newIntent = intent
+			intentParam = ""
+			intentParamValue = ""
+			isParam = false
+			intentParams = map[string]string{intentParam: intentParamValue}
+		}
+	}
 	if strings.Contains(intent, "intent_photo_take_extend") {
 		isParam = true
 		newIntent = intent
@@ -49,7 +116,7 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string) {
 	} else if strings.Contains(intent, "intent_weather_extend") {
 		isParam = true
 		newIntent = intent
-		condition, is_forecast, local_datetime, speakable_location_string, temperature, temperature_unit := weatherParser(speechText)
+		condition, is_forecast, local_datetime, speakable_location_string, temperature, temperature_unit := weatherParser(speechText, botLocation, botUnits)
 		intentParams = map[string]string{"condition": condition, "is_forecast": is_forecast, "local_datetime": local_datetime, "speakable_location_string": speakable_location_string, "temperature": temperature, "temperature_unit": temperature_unit}
 	} else if strings.Contains(intent, "intent_imperative_volumelevel_extend") {
 		isParam = true
@@ -171,11 +238,13 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string) {
 		}
 		intentParams = map[string]string{intentParam: intentParamValue}
 	} else {
-		newIntent = intent
-		intentParam = ""
-		intentParamValue = ""
-		isParam = false
-		intentParams = map[string]string{intentParam: intentParamValue}
+		if intentParam == "" {
+			newIntent = intent
+			intentParam = ""
+			intentParamValue = ""
+			isParam = false
+			intentParams = map[string]string{intentParam: intentParamValue}
+		}
 	}
 	IntentPass(req, newIntent, speechText, intentParams, isParam)
 }
@@ -189,6 +258,24 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 	var newIntent string
 	var isParam bool
 	var intentParams map[string]string
+	var botLocation string = "San Francisco"
+	var botUnits string = "F"
+	if _, err := os.Stat("./botConfigs/" + req.Device + ".json"); err == nil {
+		log.Println("Found bot config file for " + req.Device)
+		botConfigByte, err := os.ReadFile("./botConfigs/" + req.Device + ".json")
+		if err != nil {
+			log.Println(err)
+		}
+		type botConfigJSON struct {
+			Location        string `json:"location"`
+			Units           string `json:"units"`
+			UsePlaySpecific bool   `json:"use_play_specific"`
+		}
+		var botConfJSON botConfigJSON
+		json.Unmarshal(botConfigByte, &botConfJSON)
+		botLocation = botConfJSON.Location
+		botUnits = botConfJSON.Units
+	}
 	if strings.Contains(intent, "intent_photo_take_extend") {
 		isParam = true
 		newIntent = intent
@@ -226,7 +313,7 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 	} else if strings.Contains(intent, "intent_weather_extend") {
 		isParam = true
 		newIntent = intent
-		condition, is_forecast, local_datetime, speakable_location_string, temperature, temperature_unit := weatherParser(speechText)
+		condition, is_forecast, local_datetime, speakable_location_string, temperature, temperature_unit := weatherParser(speechText, botLocation, botUnits)
 		intentParams = map[string]string{"condition": condition, "is_forecast": is_forecast, "local_datetime": local_datetime, "speakable_location_string": speakable_location_string, "temperature": temperature, "temperature_unit": temperature_unit}
 	} else if strings.Contains(intent, "intent_imperative_volumelevel_extend") {
 		isParam = true
@@ -259,7 +346,7 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 		var username string
 		var nameSplitter string
 		isParam = true
-		newIntent = intent
+		newIntent = "intent_names_username"
 		if strings.Contains(speechText, "is") {
 			nameSplitter = "is"
 		} else if strings.Contains(speechText, "'s") {
@@ -293,7 +380,7 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 		}
 	} else if strings.Contains(intent, "intent_clock_settimer_extend") {
 		isParam = true
-		newIntent = intent
+		newIntent = "intent_clock_settimer"
 		timerSecs := words2num(speechText)
 		if debugLogging == true {
 			log.Println("Seconds parsed from speech: " + timerSecs)
@@ -303,14 +390,14 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 		intentParams = map[string]string{intentParam: intentParamValue}
 	} else if strings.Contains(intent, "intent_global_stop_extend") {
 		isParam = true
-		newIntent = intent
+		newIntent = "intent_global_stop"
 		intentParam = "what_to_stop"
 		intentParamValue = "timer"
 		intentParams = map[string]string{intentParam: intentParamValue}
 	} else if strings.Contains(intent, "intent_message_playmessage_extend") {
 		var given_name string
 		isParam = true
-		newIntent = intent
+		newIntent = "intent_message_playmessage"
 		intentParam = "given_name"
 		if strings.Contains(speechText, " for ") {
 			splitPhrase := strings.SplitAfter(speechText, " for ")
@@ -330,7 +417,7 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 	} else if strings.Contains(intent, "intent_message_recordmessage_extend") {
 		var given_name string
 		isParam = true
-		newIntent = intent
+		newIntent = "intent_message_recordmessage"
 		intentParam = "given_name"
 		if strings.Contains(speechText, " for ") {
 			splitPhrase := strings.SplitAfter(speechText, " for ")
@@ -359,7 +446,7 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 		intentParam = "entity_behavior"
 		intentParamValue = "fist_bump"
 		intentParams = map[string]string{intentParam: intentParamValue}
-	} else if strings.Contains(intent, "intent_imperative_rollcube") {
+	} else if strings.Contains(intent, "intent_play_rollcube") {
 		isParam = true
 		newIntent = "intent_play_specific_extend"
 		intentParam = "entity_behavior"
