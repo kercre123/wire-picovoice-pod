@@ -78,11 +78,23 @@ After all of that, try a voice command.
 
 ## Configure specific bots
 
-`./chipper/botSetup.sh` is there to help configure specific bots. This is not required for operation, and is there only if you have multiple users using your instance of wire-picovoice-pod and you would like to use different locations/units for weather. It also helps chipper know if a bot is on an older version of VicOS and accounts for it. This is only a stand-in until jdocs and stuff get implemented.
+`./chipper/botSetup.sh` is there to help configure specific bots. This is not required for operation, and is there for only if you have multiple users using your instance of wire-picovoice-pod and you would like to use different locations/units for weather depending on the bot. It also helps chipper know if a bot is on an older version of VicOS so it can account for that. This is only a stand-in until jdocs and stuff get implemented.
 
 ```
 Usage: ./chipper/botSetup.sh <esn> <firmware-prefix> "<location>" <units>
 Example: ./chipper/botSetup.sh 0060059b 1.8 "Des Moines, Iowa" F
+```
+
+## 0.10-era bots
+
+0.10 and below use raw PCM streams rather than the modern Opus streams. This has support for those streams and no special configuration server-side is required for it. However: you will need to get a domain which is the same length as `chipper-dev.api.anki.com`, make sure to run this on a port that is 3 characters long (like the default 443), add true TLS certificates (can be done in ./chipper/source.sh. make sure to include the chain), and run these commands (SSHed into the bot):
+
+```
+cd /anki/bin
+systemctl stop vic-cloud
+cp vic-cloud orig-vic-cloud
+sed -i "s/chipper-dev.api.anki.com:443/<domain>:<port>/g" vic-cloud
+systemctl start vic-cloud
 ```
 
 ## Status
