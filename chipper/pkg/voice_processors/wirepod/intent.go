@@ -107,7 +107,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		for doSTT == true {
 			if micData != nil {
 				if die == false {
-					if voiceTimer > 1 {
+					if voiceTimer > 0 {
 						if sayStarting == true {
 							if debugLogging == true {
 								fmt.Printf("Starting transcription...")
