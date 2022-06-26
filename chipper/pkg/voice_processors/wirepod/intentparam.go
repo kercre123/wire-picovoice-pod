@@ -2,7 +2,7 @@ package wirepod
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"os"
 	"strings"
 
@@ -19,10 +19,12 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string) {
 	var botUnits string = "F"
 	var botPlaySpecific bool = false
 	if _, err := os.Stat("./botConfigs/" + req.Device + ".json"); err == nil {
-		log.Println("Found bot config file for " + req.Device)
+		if debugLogging == true {
+			fmt.Println("Found bot config file for " + req.Device)
+		}
 		botConfigByte, err := os.ReadFile("./botConfigs/" + req.Device + ".json")
 		if err != nil {
-			log.Println(err)
+			fmt.Println(err)
 		}
 		type botConfigJSON struct {
 			Location        string `json:"location"`
@@ -168,25 +170,25 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string) {
 				username = username + " " + strings.TrimSpace(splitPhrase[2]) + " " + strings.TrimSpace(splitPhrase[3])
 			}
 			if debugLogging == true {
-				log.Println("Name parsed from speech: " + "`" + username + "`")
+				fmt.Println("Name parsed from speech: " + "`" + username + "`")
 			}
 			intentParam = "username"
 			intentParamValue = username
 			intentParams = map[string]string{intentParam: intentParamValue}
 		} else {
 			if debugLogging == true {
-				log.Println("No name parsed from speech")
-				intentParam = "username"
-				intentParamValue = ""
-				intentParams = map[string]string{intentParam: intentParamValue}
+				fmt.Println("No name parsed from speech")
 			}
+			intentParam = "username"
+			intentParamValue = ""
+			intentParams = map[string]string{intentParam: intentParamValue}
 		}
 	} else if strings.Contains(intent, "intent_clock_settimer_extend") {
 		isParam = true
 		newIntent = intent
 		timerSecs := words2num(speechText)
 		if debugLogging == true {
-			log.Println("Seconds parsed from speech: " + timerSecs)
+			fmt.Println("Seconds parsed from speech: " + timerSecs)
 		}
 		intentParam = "timer_duration"
 		intentParamValue = timerSecs
@@ -261,10 +263,12 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 	var botLocation string = "San Francisco"
 	var botUnits string = "F"
 	if _, err := os.Stat("./botConfigs/" + req.Device + ".json"); err == nil {
-		log.Println("Found bot config file for " + req.Device)
+		if debugLogging == true {
+			fmt.Println("Found bot config file for " + req.Device)
+		}
 		botConfigByte, err := os.ReadFile("./botConfigs/" + req.Device + ".json")
 		if err != nil {
-			log.Println(err)
+			fmt.Println(err)
 		}
 		type botConfigJSON struct {
 			Location        string `json:"location"`
@@ -365,25 +369,25 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 				username = username + " " + strings.TrimSpace(splitPhrase[2]) + " " + strings.TrimSpace(splitPhrase[3])
 			}
 			if debugLogging == true {
-				log.Println("Name parsed from speech: " + "`" + username + "`")
+				fmt.Println("Name parsed from speech: " + "`" + username + "`")
 			}
 			intentParam = "username"
 			intentParamValue = username
 			intentParams = map[string]string{intentParam: intentParamValue}
 		} else {
 			if debugLogging == true {
-				log.Println("No name parsed from speech")
-				intentParam = "username"
-				intentParamValue = ""
-				intentParams = map[string]string{intentParam: intentParamValue}
+				fmt.Println("No name parsed from speech")
 			}
+			intentParam = "username"
+			intentParamValue = ""
+			intentParams = map[string]string{intentParam: intentParamValue}
 		}
 	} else if strings.Contains(intent, "intent_clock_settimer_extend") {
 		isParam = true
 		newIntent = "intent_clock_settimer"
 		timerSecs := words2num(speechText)
 		if debugLogging == true {
-			log.Println("Seconds parsed from speech: " + timerSecs)
+			fmt.Println("Seconds parsed from speech: " + timerSecs)
 		}
 		intentParam = "timer_duration"
 		intentParamValue = timerSecs

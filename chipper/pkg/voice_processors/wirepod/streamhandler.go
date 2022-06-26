@@ -2,6 +2,7 @@ package wirepod
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -76,7 +77,7 @@ func bytesToInt(stream opus.OggStream, data []byte, die bool, isOpus bool) []int
 		// opus
 		n, err := stream.Decode(data)
 		if err != nil {
-			log.Println(err)
+			fmt.Println(err)
 		}
 		return bytesToSamples(n)
 	} else {

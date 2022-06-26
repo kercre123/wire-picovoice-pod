@@ -1,7 +1,7 @@
 package wirepod
 
 import (
-	"log"
+	"fmt"
 	"strings"
 
 	pb "github.com/digital-dream-labs/api/go/chipperpb"
@@ -24,11 +24,11 @@ func IntentPass(req *vtt.IntentRequest, intentThing string, speechText string, i
 		Intent: &intent,
 	}
 	if debugLogging == true {
-		log.Println("Intent Sent: " + intentThing)
+		fmt.Println("Intent Sent: " + intentThing)
 		if isParam == true {
-			log.Println("Parameters Sent:", intentParams)
+			fmt.Println("Parameters Sent:", intentParams)
 		} else {
-			log.Println("No Parameters Sent")
+			fmt.Println("No Parameters Sent")
 		}
 	}
 	return r, nil

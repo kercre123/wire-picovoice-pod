@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	pb "github.com/digital-dream-labs/api/go/chipperpb"
 	"github.com/digital-dream-labs/chipper/pkg/server"
 	"github.com/digital-dream-labs/chipper/pkg/voice_processors/wirepod"
@@ -71,6 +73,7 @@ func startServer() {
 	pb.RegisterChipperGrpcServer(srv.Transport(), s)
 
 	srv.Start()
+	fmt.Println("Server started successfully!")
 
 	<-srv.Notify(grpcserver.Stopped)
 }
