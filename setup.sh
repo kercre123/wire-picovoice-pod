@@ -266,16 +266,16 @@ function makeSource() {
    function houndifyPrompt() {
    echo
    echo "Would you like to setup knowledge graph (I have a question) commands? This involves creating a free account at https://www.houndify.com/signup and putting in your Client Key and Client ID."
-   echo "NOTE: This will be a trial account and will not be free forever."
+   echo "Note: It may seem like you only get a trial, but there is an actual free tier with 100 free requests per day."
    echo "This is not required, and if you choose 2 then placeholder values will be used. And if you change your mind later, just run ./setup.sh with the 5th option."
    echo
    echo "1: Yes"
    echo "2: No"
-   read -p "Enter a number (2): " yn
+   read -p "Enter a number (1): " yn
    case $yn in
       "1" ) knowledgeSetup="true";;
       "2" ) knowledgeSetup="false";;
-      "" ) knowledgeSetup="false";;
+      "" ) knowledgeSetup="true";;
       * ) echo "Please answer with 1 or 2."; houndifyPrompt;;
    esac
    }
@@ -309,7 +309,9 @@ function makeSource() {
       fi
       }
       houndifyIDPrompt
-      houndifyKeyPrompt
+      if [[ ${knowledgeSetup} == "true" ]]; then
+         houndifyKeyPrompt
+      fi
    fi
    echo "export DDL_RPC_PORT=${port}" > source.sh
    echo 'export DDL_RPC_TLS_CERTIFICATE=$(cat ../certs/cert.crt)' >> source.sh

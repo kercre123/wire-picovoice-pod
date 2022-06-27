@@ -103,6 +103,7 @@ OS Support:
 
 - Arch
 - Debian/Ubuntu/other APT distros
+- Windows (WSL only)
 
 Architecture Support:
 
@@ -118,8 +119,10 @@ Things wire-picovoice-pod has worked on:
 - Nintendo Switch with L4T Ubuntu
 - Desktop with Ryzen 5 3600, 16 GB RAM with Ubuntu 22.04
 - Laptop with mobile i7
+- Late 2009 iMac with Core 2 Duo
 - Android Devices
 	- Pixel 4, Note 4, Razer Phone, Oculus Quest 2, OnePlus 7 Pro, Moto G6, Pixel 2
+	- If you run into an error when trying to execute start.sh, please open an issue. This is a Picovoice Leopard issue and can be solved by editing the leopard module.
 	- [Termux](https://github.com/termux/termux-app) proot-distro: Use Ubuntu, make sure to use a port above 1024 and not the default 443.
 	- Linux Deploy: Works stock, just make sure to choose the arch that matches your device in settings. Also use a bigger image size, at least 3 GB.
 
@@ -127,8 +130,7 @@ General notes:
 
 - If you get this error when running chipper, you are using a port that is being taken up by a program already: `panic: runtime error: invalid memory address or nil pointer dereference`
 	- Run `./setup.sh` with the 5th and 6th option to change the port, you will need to push files to the bot again.
-- If you want to disable logging from the voice processor, recompile chipper with `debugLogging` in ./chipper/pkg/voice_processors/noop/intent.go set to `false`.
-	- Currently doesn't work
+- If you want to disable logging from the voice processor, edit `./chipper/source.sh` and change `DEBUG_LOGGING` to `false`
 
 Current implemented actions:
 
@@ -165,8 +167,11 @@ Current implemented actions:
 - Take a photo of me
 - What's the weather
 	- Requires API setup
+	- weatherapi.com is implemented, use the 5th option in `./setup.sh` to set it up
+	- To set a default location, use the `botSetup.sh` script in the `./chipper` directory
 - What's the weather in <location>
 	- Requires API setup
+	- weatherapi.com is implemented, use the 5th option in `./setup.sh` to set it up
 - Im sorry
 - Back up
 - Come here
@@ -179,7 +184,8 @@ Current implemented actions:
 - Shut up
 - My name is <name>
 - I have a question
-	- Placeholder text
+	- Requires API setup
+	- Houndify is implemented, use the 5th option in `./setup.sh` to set it up
 - Set a timer for <time> seconds
 - Set a timer for <time> minutes
 - Check the timer
@@ -190,9 +196,9 @@ Current implemented actions:
 - Find the cube
 - Do a trick
 - Record a message for <name>
-	- Enable `Messaging` feature in webViz Features tab
+	- Enable `Messaging` feature in Vector's webViz Features tab
 - Play a message for <name>
-	- Enable `Messaging` feature in webViz Features tab
+	- Enable `Messaging` feature in Vector's webViz Features tab
 - Play keepaway
 	- This may only be a feature in 1.5 and lower
 
