@@ -72,9 +72,16 @@ sudo ./start.sh
 	- When it asks, enter `Bypass`
 	- Download [this file](https://wire.my.to/wsl-firewall.ps1)
 	- Go to your Downloads folder in File Explorer and Right Click -> Run as administrator
+5. Try a voice command
 
+### macOS
 
-After all of that, try a voice command.
+1. Open Terminal
+2. Install brew
+	- Run `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+3. Install wire-picovoice-pod
+	- Follow the Linux instructions
+4. Try a voice command
 
 ## Configure specific bots
 

@@ -3,16 +3,26 @@
 echo
 
 UNAME=$(uname -a)
-CPUINFO=$(cat /proc/cpuinfo)
+#CPUINFO=$(cat /proc/cpuinfo)
 
-if [[ -f /usr/bin/apt ]]; then
+if [[ $OSTYPE == *"darwin"* ]]; then
+   if [[ ! -f /usr/local/Homebrew/bin/brew ]]; then
+      echo "macOS detected, but brew is not installed. Go to https://brew.sh/ for the installation command."
+      exit 1
+   fi
+fi
+
+if [[ -f /usr/local/Homebrew/bin/brew ]]; then
+   TARGET="macos"
+   echo "macOS detected."
+elif [[ -f /usr/bin/apt ]]; then
    TARGET="debian"
    echo "Debian-based Linux confirmed."
 elif [[ -f /usr/bin/pacman ]]; then
    TARGET="arch"
    echo "Arch Linux confirmed."
 else
-   echo "This OS is not supported. This script currently supports Arch and Debian-based Linux."
+   echo "This OS is not supported. This script currently supports Arch Linux, Debian-based Linux, and macOS with Brew."
    exit 1
 fi
 
@@ -52,13 +62,15 @@ function getPackages() {
       elif [[ ${TARGET} == "arch" ]]; then
          pacman -Sy --noconfirm
          sudo pacman -S --noconfirm wget openssl net-tools sox opus make iproute2 opusfile
+      elif [[ ${TARGET} == "macos" ]]; then
+         brew install opusfile opus pkg-config gcc golang
       fi
       touch ./vector-cloud/packagesGotten
       echo
       echo "Installing golang binary package"
       mkdir golang
       cd golang
-      if [[ ! -f /usr/local/go/bin/go ]]; then
+      if [[ ! -f /usr/local/go/bin/go ]] && [[ ! ${TARGET} == "macos" ]]; then
          if [[ ${ARCH} == "x86_64" ]]; then
             wget -q --show-progress https://go.dev/dl/go1.18.2.linux-amd64.tar.gz
             rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.2.linux-amd64.tar.gz
@@ -118,7 +130,11 @@ function IPDNSPrompt() {
 }
 
 function IPPrompt() {
-   IPADDRESS=$(ip -4 addr | grep $(ip addr | awk '/state UP/ {print $2}' | sed 's/://g') | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+   if [[ ${TARGET} == "macos" ]]; then
+       IPADDRESS=`ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $2 }' | cut -f2 -d:`
+   else
+       IPADDRESS=$(ip -4 addr | grep $(ip addr | awk '/state UP/ {print $2}' | sed 's/://g') | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+   fi
    echo
    read -p "Enter the IP address of the machine you are running this script on (${IPADDRESS}): " ipaddress
    if [[ ! -n ${ipaddress} ]]; then

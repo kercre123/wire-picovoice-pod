@@ -26,4 +26,12 @@ fi
 source source.sh
 
 #./chipper
-/usr/local/go/bin/go run cmd/main.go
+if [[ $OSTYPE == *"darwin"* ]]; then
+  if [[ ! -f ./gotSys ]]; then
+    go get -u golang.org/x/sys
+    touch gotSys
+  fi
+  go run cmd/main.go
+else
+  /usr/local/go/bin/go run cmd/main.go
+fi

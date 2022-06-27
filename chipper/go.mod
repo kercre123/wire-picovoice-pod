@@ -11,6 +11,7 @@ require (
 	github.com/go-audio/audio v1.0.0 // indirect
 	github.com/go-audio/wav v1.1.0 // indirect
 	github.com/soundhound/houndify-sdk-go v0.3.4 // indirect
+	golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b // indirect
 	google.golang.org/grpc v1.32.0
 	gopkg.in/pipe.v2 v2.0.0-20140414041502-3c2ca4d52544 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200605160147-a5ece683394c // indirect
