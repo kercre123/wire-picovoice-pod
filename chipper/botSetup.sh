@@ -23,14 +23,16 @@ if [[ ! -n $4 ]]; then
     exit 1
 fi
 
-ESN=${1,,}
-IFS='.' read -ra VICV <<< ${2}
+ESN=$(echo $1 | tr '[:upper:]' '[:lower:]')
+#IFS='.' read -ra VICV <<< ${2}
+VICV1="$(cut -d'.' -f1 <<<"$2")"
+VICV2="$(cut -d'.' -f2 <<<"$2")"
 LOCATION=${3}
-UNITS=${4^^}
+UNITS=$(echo $4 | tr '[:lower:]' '[:upper:]')
 
 echo
 echo "ESN: ${ESN}"
-echo "Firmware prefix: ${VICV[@]}"
+echo "Firmware prefix: ${VICV1}.${VICV2}"
 echo "Location: ${LOCATION}"
 echo "Units: ${UNITS}"
 echo
@@ -41,14 +43,11 @@ if [[ ${UNITS} != "F" && ${UNITS} != "C" ]]; then
     exit 1
 fi
 
-if [[ ! -n ${VICV[1]} ]]; then
+if [[ ! -n ${VICV1} ]]; then
     echo "ERROR: VicOS Version must have at least two numbers. Exiting."
     echo "Example: 1.8"
     echo "Usage: ./botSetup.sh <esn> <firmware-prefix> <location> <units>"
 fi
-
-VICV1=$(expr ${VICV[0]})
-VICV2=$(expr ${VICV[1]})
 
 if [[ ${VICV1} == 1 ]]; then
     if [[ ${VICV2} > 5 ]]; then

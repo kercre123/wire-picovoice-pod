@@ -358,7 +358,12 @@ function makeSource() {
    echo "Creating server_config.json for robot"
    echo '{"jdocs": "jdocs.api.anki.com:443", "tms": "token.api.anki.com:443", "chipper": "REPLACEME", "check": "conncheck.global.anki-services.com/ok", "logfiles": "s3://anki-device-logs-prod/victor", "appkey": "oDoa0quieSeir6goowai7f"}' > server_config.json
    address=$(cat address)
-   sed -i "s/REPLACEME/${address}:${port}/g" server_config.json
+   if [[ ${TARGET} == "macos" ]]; then
+      #perl -i -pe's/REPLACEME/$(cat address):${port}/g' server_config.json
+      sed -i .bak "s/REPLACEME/${address}:${port}/g" server_config.json
+   else
+      sed -i "s/REPLACEME/${address}:${port}/g" server_config.json
+   fi
    cd ..
    echo "Created!"
    echo
@@ -383,7 +388,7 @@ function scpToBot() {
       echo
       if [[ ! -f ./ssh_root_key ]]; then
          echo "Key not provided, downloading ssh_root_key..."
-         wget http://wire.my.to:81/ssh_root_key
+         curl -o ssh_root_key http://wire.my.to:81/ssh_root_key
       else
          echo "Key not provided, using ./ssh_root_key (already there)..."
       fi
