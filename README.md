@@ -43,12 +43,45 @@ Example:
 
 The bot should now be configured to communicate with your server. You do not need to restart the bot to start using voice commands with the new server environment, but you will need to restart him at some point for weather commands to be reliable.
 
-To start chipper, run:
+To start wire-picovoice-pod, run:
 
 ```
 cd chipper
 sudo ./start.sh
 ```
+
+To stop wire-picovoice-pod, press CTRL+C with the terminal window on top.
+
+#### Update
+
+To update to a newer version of wire-picovoice-pod, make sure chipper is not running then run:
+
+`cd ~/wire-picovoice-pod`
+`sudo git pull`
+`cd chipper`
+`sudo ./start.sh`
+
+If you see an error, run the command it tells you to run but with `sudo` at the beginning of the command. Then run `sudo ./start.sh` again.
+
+#### Systemd daemon
+
+You can setup a systemd daemon for wire-picovoice-pod. This allows it to run in the background and it to run automatically at startup.
+
+`cd ~/wire-picovoice-pod`
+`sudo ./setup.sh daemon-enable`
+
+To start the service, either restart your computer or run:
+
+`sudo systemctl start wire-picovoice-pod`
+
+To see logs:
+
+`journalctl -fe | grep start.sh`
+
+If you would like to disable the daemon, run:
+
+`cd ~/wire-picovoice-pod`
+`sudo ./setup.sh daemon-disable`
 
 ### Windows 10/11
 
@@ -113,7 +146,8 @@ OS Support:
 
 - Arch
 - Debian/Ubuntu/other APT distros
-- Windows (WSL only)
+- Windows 10/11 (WSL only)
+- macOS 10.15 or above
 
 Architecture Support:
 

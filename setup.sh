@@ -438,6 +438,55 @@ function scpToBot() {
    echo
 }
 
+function setupSystemd() {
+   if [[ ${TARGET} == "macos" ]]; then
+      echo "This cannot be done on macOS."
+      exit 1
+   fi
+   echo "[Unit]" > wire-picovoice-pod.service
+   echo "Description=Wire Escape Pod (picovoice)" >> wire-picovoice-pod.service
+   echo >> wire-picovoice-pod.service
+   echo "[Service]" >> wire-picovoice-pod.service
+   echo "Type=simple" >> wire-picovoice-pod.service
+   echo "WorkingDirectory=$(readlink -f ./chipper)" >> wire-picovoice-pod.service
+   echo "ExecStart=$(readlink -f ./chipper/start.sh)" >> wire-picovoice-pod.service
+   echo >> wire-picovoice-pod.service
+   echo "[Install]" >> wire-picovoice-pod.service
+   echo "WantedBy=multi-user.target" >> wire-picovoice-pod.service
+   cat wire-picovoice-pod.service
+   echo
+   echo "wire-picovoice-pod.service created, building chipper..."
+   cd chipper
+   /usr/local/go/bin/go build cmd/main.go
+   mv main chipper
+   echo
+   echo "./chipper/chipper has been built!"
+   cd ..
+   mv wire-picovoice-pod.service /lib/systemd/system/
+   systemctl daemon-reload
+   systemctl enable wire-picovoice-pod
+   echo
+   echo "systemd service has been installed and enabled! The service is called wire-picovoice-pod.service"
+   echo
+   echo "To start the service, run: 'systemctl start wire-picovoice-pod'"
+   echo "Then, to see logs, run 'journalctl -fe | grep start.sh'"
+}
+
+function disableSystemd() {
+   if [[ ${TARGET} == "macos" ]]; then
+      echo "This cannot be done on macOS."
+      exit 1
+   fi
+   echo
+   echo "Disabling wire-picovoice-pod.service"
+   systemctl stop wire-picovoice-pod.service
+   systemctl disable wire-picovoice-pod.service
+   rm -f /lib/systemd/system/wire-picovoice-pod.service
+   systemctl daemon-reload
+   echo
+   echo "wire-picovoice-pod.service has been removed and disabled."
+}
+
 function firstPrompt() {
    read -p "Enter a number (1): " yn
    case $yn in
@@ -455,6 +504,16 @@ if [[ $1 == "scp" ]]; then
    botAddress=$2
    keyPath=$3
    scpToBot
+   exit 0
+fi
+
+if [[ $1 == "daemon-enable" ]]; then
+   setupSystemd
+   exit 0
+fi
+
+if [[ $1 == "daemon-disable" ]]; then
+   disableSystemd
    exit 0
 fi
 

@@ -25,7 +25,9 @@ fi
 
 source source.sh
 
-#./chipper
+if [[ -f ./chipper ]]; then
+  ./chipper
+else
 if [[ $OSTYPE == *"darwin"* ]]; then
   if [[ ! -f ./gotSys ]]; then
     go get -u golang.org/x/sys
@@ -34,4 +36,5 @@ if [[ $OSTYPE == *"darwin"* ]]; then
   go run cmd/main.go
 else
   /usr/local/go/bin/go run cmd/main.go
+fi
 fi
