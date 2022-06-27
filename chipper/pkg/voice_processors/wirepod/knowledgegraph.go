@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	leopard "github.com/Picovoice/leopard/binding/go"
 	pb "github.com/digital-dream-labs/api/go/chipperpb"
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
 	opus "github.com/digital-dream-labs/opus-go/opus"
@@ -17,6 +18,8 @@ import (
 
 var hclient houndify.Client
 var houndEnable bool = true
+
+var disableLiveTranscriptionKG bool = false
 
 func InitHoundify() {
 	if os.Getenv("HOUNDIFY_ENABLED") == "true" {
@@ -79,6 +82,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 	var die bool = false
 	var doSTT bool = true
 	var sayStarting = true
+	var leopardSTT leopard.Leopard
 	if os.Getenv("DEBUG_LOGGING") != "true" && os.Getenv("DEBUG_LOGGING") != "false" {
 		fmt.Println("No valid value for DEBUG_LOGGING, setting to true")
 		debugLogging = true
@@ -90,6 +94,40 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 		}
 	}
 	botNumKG = botNumKG + 1
+	justThisBotNum := botNumKG
+	if botNum > 1 {
+		disableLiveTranscription = true
+	} else {
+		disableLiveTranscription = false
+	}
+	if justThisBotNum == 1 {
+		leopardSTT = leopardSTT1
+	} else if justThisBotNum == 2 {
+		leopardSTT = leopardSTT2
+	} else if justThisBotNum == 3 {
+		leopardSTT = leopardSTT3
+	} else if justThisBotNum == 4 {
+		leopardSTT = leopardSTT4
+	} else if justThisBotNum == 5 {
+		leopardSTT = leopardSTT5
+	} else {
+		fmt.Println("Too many bots are connected, sending error to bot " + strconv.Itoa(justThisBotNum))
+		NoResultSpoken = knowledgeAPI(req.Session, transcribedText)
+		kg := pb.KnowledgeGraphResponse{
+			Session:     req.Session,
+			DeviceId:    req.Device,
+			CommandType: NoResult,
+			SpokenText:  NoResultSpoken,
+		}
+		botNumKG = botNumKG - 1
+		if err := req.Stream.Send(&kg); err != nil {
+			return nil, err
+		}
+		return &vtt.KnowledgeGraphResponse{
+			Intent: &kg,
+		}, nil
+		return nil, nil
+	}
 	if debugLogging == true {
 		fmt.Println("(KG) Bot " + strconv.Itoa(botNumKG) + " ESN: " + req.Device)
 		fmt.Println("(KG) Bot " + strconv.Itoa(botNumKG) + " Session: " + req.Session)
@@ -124,68 +162,88 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 		}
 	}()
 	go func() {
+		if botNumKG > 1 {
+			fmt.Println("(KG) Multiple bots are streaming, live transcription disabled")
+			disableLiveTranscriptionKG = true
+		}
 		for doSTT == true {
-			if micData != nil {
-				if die == false {
-					if voiceTimer > 1 {
-						if sayStarting == true {
-							if debugLogging == true {
-								fmt.Printf("(KG) Starting transcription...")
-							}
-							sayStarting = false
-						}
-						processOneData := micData
-						transcription1Raw, err := leopardSTT.Process(processOneData)
-						if err != nil {
-							log.Println(err)
-						}
-						transcription1 = strings.ToLower(transcription1Raw)
-						if debugLogging == true {
-							fmt.Printf("\r(KG) Bot " + strconv.Itoa(botNumKG) + " Transcription: " + transcription1)
-						}
-						if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
-							transcribedText = transcription1
-							if debugLogging == true {
-								fmt.Printf("\n")
-							}
-							die = true
-							break
-						} else if voiceTimer == 7 {
-							transcribedText = transcription2
-							if debugLogging == true {
-								fmt.Printf("\n")
-							}
-							die = true
-							break
-						}
-						time.Sleep(time.Millisecond * 100)
-						processTwoData := micData
-						transcription2Raw, err := leopardSTT.Process(processTwoData)
-						if err != nil {
-							log.Println(err)
-						}
-						transcription2 = strings.ToLower(transcription2Raw)
-						if debugLogging == true {
-							fmt.Printf("\r(KG) Bot " + strconv.Itoa(botNumKG) + " Transcription: " + transcription2)
-						}
-						if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
-							transcribedText = transcription1
-							if debugLogging == true {
-								fmt.Printf("\n")
-							}
-							die = true
-							break
-						} else if voiceTimer == 7 {
-							transcribedText = transcription2
-							if debugLogging == true {
-								fmt.Printf("\n")
-							}
-							die = true
-							break
-						}
-						time.Sleep(time.Millisecond * 200)
+			if micData != nil && die == false && voiceTimer > 0 {
+				if sayStarting == true {
+					if debugLogging == true {
+						fmt.Printf("(KG) Transcribing stream %d...\n", justThisBotNum)
+					}
+					sayStarting = false
+				}
+				processOneData := micData
+				transcription1Raw, err := leopardSTT.Process(processOneData)
+				if err != nil {
+					log.Println(err)
+				}
+				transcription1 = strings.ToLower(transcription1Raw)
+				if debugLogging == true {
+					if disableLiveTranscriptionKG == false {
+						fmt.Printf("\r(KG) Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription1)
 					}
 				}
+				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
+					transcribedText = transcription1
+					if debugLogging == true {
+						if disableLiveTranscriptionKG == false {
+							fmt.Printf("\n")
+						} else {
+							fmt.Println("\r(KG) Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						}
+					}
+					die = true
+					break
+				} else if voiceTimer == 7 {
+					transcribedText = transcription2
+					if debugLogging == true {
+						if disableLiveTranscriptionKG == false {
+							fmt.Printf("\n")
+						} else {
+							fmt.Println("\r(KG) Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						}
+					}
+					die = true
+					break
+				}
+				time.Sleep(time.Millisecond * 150)
+				processTwoData := micData
+				transcription2Raw, err := leopardSTT.Process(processTwoData)
+				if err != nil {
+					log.Println(err)
+				}
+				transcription2 = strings.ToLower(transcription2Raw)
+				if debugLogging == true {
+					if disableLiveTranscriptionKG == false {
+						fmt.Printf("\r(KG) Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription2)
+					}
+				}
+				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
+					transcribedText = transcription1
+					if debugLogging == true {
+						if disableLiveTranscriptionKG == false {
+							fmt.Printf("\n")
+						} else {
+							fmt.Println("\r(KG) Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						}
+					}
+					die = true
+					break
+				} else if voiceTimer == 7 {
+					transcribedText = transcription2
+					if debugLogging == true {
+						if disableLiveTranscriptionKG == false {
+							fmt.Printf("\n")
+						} else {
+							fmt.Println("\r(KG) Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						}
+					}
+					die = true
+					break
+				}
+				time.Sleep(time.Millisecond * 150)
 			}
 		}
 	}()

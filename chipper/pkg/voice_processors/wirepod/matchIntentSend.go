@@ -2,13 +2,14 @@ package wirepod
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	pb "github.com/digital-dream-labs/api/go/chipperpb"
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
 )
 
-func IntentPass(req *vtt.IntentRequest, intentThing string, speechText string, intentParams map[string]string, isParam bool) (*vtt.IntentResponse, error) {
+func IntentPass(req *vtt.IntentRequest, intentThing string, speechText string, intentParams map[string]string, isParam bool, justThisBotNum int) (*vtt.IntentResponse, error) {
 	intent := pb.IntentResponse{
 		IsFinal: true,
 		IntentResult: &pb.IntentResult{
@@ -24,9 +25,9 @@ func IntentPass(req *vtt.IntentRequest, intentThing string, speechText string, i
 		Intent: &intent,
 	}
 	if debugLogging == true {
-		fmt.Println("Intent Sent: " + intentThing)
+		fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Intent Sent: " + intentThing)
 		if isParam == true {
-			fmt.Println("Parameters Sent:", intentParams)
+			fmt.Println("Bot "+strconv.Itoa(justThisBotNum)+" Parameters Sent:", intentParams)
 		} else {
 			fmt.Println("No Parameters Sent")
 		}
@@ -34,7 +35,7 @@ func IntentPass(req *vtt.IntentRequest, intentThing string, speechText string, i
 	return r, nil
 }
 
-func processTextAll(req *vtt.IntentRequest, voiceText string, listOfLists [][]string, intentList []string, isOpus bool) int {
+func processTextAll(req *vtt.IntentRequest, voiceText string, listOfLists [][]string, intentList []string, isOpus bool, justThisBotNum int) int {
 	var matched int = 0
 	var intentNum int = 0
 	var successMatched int = 0
@@ -42,9 +43,9 @@ func processTextAll(req *vtt.IntentRequest, voiceText string, listOfLists [][]st
 		for _, c := range b {
 			if strings.Contains(voiceText, c) {
 				if isOpus == true {
-					paramChecker(req, intentList[intentNum], voiceText)
+					paramChecker(req, intentList[intentNum], voiceText, justThisBotNum)
 				} else {
-					prehistoricParamChecker(req, intentList[intentNum], voiceText)
+					prehistoricParamChecker(req, intentList[intentNum], voiceText, justThisBotNum)
 				}
 				successMatched = 1
 				matched = 1

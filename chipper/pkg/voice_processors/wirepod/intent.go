@@ -20,6 +20,7 @@ var leopardSTT leopard.Leopard
 var debugLogging bool
 
 var botNum int = 0
+var disableLiveTranscription bool = false
 
 func check(e error) {
 	if e != nil {
@@ -34,19 +35,70 @@ func check(e error) {
 		- current workaround: setup specific bots with botSetup.sh
 */
 
+var leopardSTT1 leopard.Leopard
+var leopardSTT2 leopard.Leopard
+var leopardSTT3 leopard.Leopard
+var leopardSTT4 leopard.Leopard
+var leopardSTT5 leopard.Leopard
+
+func initLeopard1(leopardKey string) {
+	leopardSTT1 = leopard.Leopard{AccessKey: leopardKey}
+	err := leopardSTT1.Init()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println("Initialized Picovoice Leopard 1")
+}
+
+func initLeopard2(leopardKey string) {
+	leopardSTT2 = leopard.Leopard{AccessKey: leopardKey}
+	err := leopardSTT2.Init()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println("Initialized Picovoice Leopard 2")
+}
+
+func initLeopard3(leopardKey string) {
+	leopardSTT3 = leopard.Leopard{AccessKey: leopardKey}
+	err := leopardSTT3.Init()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println("Initialized Picovoice Leopard 3")
+}
+
+func initLeopard4(leopardKey string) {
+	leopardSTT4 = leopard.Leopard{AccessKey: leopardKey}
+	err := leopardSTT4.Init()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println("Initialized Picovoice Leopard 4")
+}
+
+func initLeopard5(leopardKey string) {
+	leopardSTT5 = leopard.Leopard{AccessKey: leopardKey}
+	err := leopardSTT5.Init()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println("Initialized Picovoice Leopard 5")
+}
+
 func InitLeopard() {
 	leopardKey := os.Getenv("LEOPARD_APIKEY")
 	if leopardKey == "" {
 		fmt.Println("You must set LEOPARD_APIKEY to a value.")
 		os.Exit(1)
 	}
-	fmt.Println("Initializing Picovoice Leopard...")
-	leopardSTT = leopard.Leopard{AccessKey: leopardKey}
-	err := leopardSTT.Init()
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println("Initialized Picovoice Leopard")
+	fmt.Println("Initializing Picovoice Leopards...")
+	go initLeopard1(leopardKey)
+	go initLeopard2(leopardKey)
+	go initLeopard3(leopardKey)
+	go initLeopard4(leopardKey)
+	initLeopard5(leopardKey)
+	time.Sleep(time.Millisecond * 1500)
 }
 
 func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, error) {
@@ -59,6 +111,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 	var die bool = false
 	var doSTT bool = true
 	var sayStarting = true
+	var leopardSTT leopard.Leopard
 	if os.Getenv("DEBUG_LOGGING") != "true" && os.Getenv("DEBUG_LOGGING") != "false" {
 		fmt.Println("No valid value for DEBUG_LOGGING, setting to true")
 		debugLogging = true
@@ -70,11 +123,33 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		}
 	}
 	botNum = botNum + 1
+	justThisBotNum := botNum
+	if botNum > 1 {
+		disableLiveTranscription = true
+	} else {
+		disableLiveTranscription = false
+	}
+	if justThisBotNum == 1 {
+		leopardSTT = leopardSTT1
+	} else if justThisBotNum == 2 {
+		leopardSTT = leopardSTT2
+	} else if justThisBotNum == 3 {
+		leopardSTT = leopardSTT3
+	} else if justThisBotNum == 4 {
+		leopardSTT = leopardSTT4
+	} else if justThisBotNum == 5 {
+		leopardSTT = leopardSTT5
+	} else {
+		fmt.Println("Too many bots are connected, sending error to bot " + strconv.Itoa(justThisBotNum))
+		IntentPass(req, "intent_system_noaudio", "Too many bots, max is 5", map[string]string{"error": "EOF"}, true, justThisBotNum)
+		botNum = botNum - 1
+		return nil, nil
+	}
 	if debugLogging == true {
-		fmt.Println("Bot " + strconv.Itoa(botNum) + " ESN: " + req.Device)
-		fmt.Println("Bot " + strconv.Itoa(botNum) + " Session: " + req.Session)
-		fmt.Println("Bot " + strconv.Itoa(botNum) + " Language: " + req.LangString)
-		fmt.Println("Stream " + strconv.Itoa(botNum) + " opened.")
+		fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " ESN: " + req.Device)
+		fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Session: " + req.Session)
+		fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Language: " + req.LangString)
+		fmt.Println("Stream " + strconv.Itoa(justThisBotNum) + " opened.")
 	}
 	data := []byte{}
 	data = append(data, req.FirstReq.InputAudio...)
@@ -82,12 +157,12 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		if data[0] == 0x4f {
 			isOpus = true
 			if debugLogging == true {
-				fmt.Println("Bot " + strconv.Itoa(botNum) + " Stream Type: Opus")
+				fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Stream Type: Opus")
 			}
 		} else {
 			isOpus = false
 			if debugLogging == true {
-				fmt.Println("Bot " + strconv.Itoa(botNum) + " Stream Type: PCM")
+				fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Stream Type: PCM")
 			}
 		}
 	}
@@ -104,11 +179,15 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		}
 	}()
 	go func() {
+		if botNum > 1 {
+			fmt.Println("Multiple bots are streaming, live transcription disabled")
+			disableLiveTranscription = true
+		}
 		for doSTT == true {
 			if micData != nil && die == false && voiceTimer > 0 {
 				if sayStarting == true {
 					if debugLogging == true {
-						fmt.Printf("Starting transcription...")
+						fmt.Printf("Transcribing stream %d...\n", justThisBotNum)
 					}
 					sayStarting = false
 				}
@@ -119,19 +198,29 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 				}
 				transcription1 = strings.ToLower(transcription1Raw)
 				if debugLogging == true {
-					fmt.Printf("\rBot " + strconv.Itoa(botNum) + " Transcription: " + transcription1)
+					if disableLiveTranscription == false {
+						fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription1)
+					}
 				}
 				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
 					transcribedText = transcription1
 					if debugLogging == true {
-						fmt.Printf("\n")
+						if disableLiveTranscription == false {
+							fmt.Printf("\n")
+						} else {
+							fmt.Println("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						}
 					}
 					die = true
 					break
 				} else if voiceTimer == 7 {
 					transcribedText = transcription2
 					if debugLogging == true {
-						fmt.Printf("\n")
+						if disableLiveTranscription == false {
+							fmt.Printf("\n")
+						} else {
+							fmt.Println("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						}
 					}
 					die = true
 					break
@@ -144,19 +233,29 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 				}
 				transcription2 = strings.ToLower(transcription2Raw)
 				if debugLogging == true {
-					fmt.Printf("\rBot " + strconv.Itoa(botNum) + " Transcription: " + transcription2)
+					if disableLiveTranscription == false {
+						fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription2)
+					}
 				}
 				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
 					transcribedText = transcription1
 					if debugLogging == true {
-						fmt.Printf("\n")
+						if disableLiveTranscription == false {
+							fmt.Printf("\n")
+						} else {
+							fmt.Println("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						}
 					}
 					die = true
 					break
 				} else if voiceTimer == 7 {
 					transcribedText = transcription2
 					if debugLogging == true {
-						fmt.Printf("\n")
+						if disableLiveTranscription == false {
+							fmt.Printf("\n")
+						} else {
+							fmt.Println("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						}
 					}
 					die = true
 					break
@@ -169,7 +268,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		chunk, err := req.Stream.Recv()
 		if err != nil {
 			if err == io.EOF {
-				IntentPass(req, "intent_system_noaudio", "EOF error", map[string]string{"error": "EOF"}, true)
+				IntentPass(req, "intent_system_noaudio", "EOF error", map[string]string{"error": "EOF"}, true, justThisBotNum)
 				break
 			}
 		}
@@ -179,12 +278,12 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		data = append(data, chunk.InputAudio...)
 		micData = bytesToInt(stream, data, die, isOpus)
 	}
-	successMatched := processTextAll(req, transcribedText, matchListList, intentsList, isOpus)
+	successMatched := processTextAll(req, transcribedText, matchListList, intentsList, isOpus, justThisBotNum)
 	if successMatched == 0 {
 		if debugLogging == true {
 			fmt.Println("No intent was matched.")
 		}
-		IntentPass(req, "intent_system_noaudio", transcribedText, map[string]string{"": ""}, false)
+		IntentPass(req, "intent_system_noaudio", transcribedText, map[string]string{"": ""}, false, justThisBotNum)
 	}
 	botNum = botNum - 1
 	return nil, nil

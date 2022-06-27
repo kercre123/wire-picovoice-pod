@@ -9,7 +9,7 @@ import (
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
 )
 
-func paramChecker(req *vtt.IntentRequest, intent string, speechText string) {
+func paramChecker(req *vtt.IntentRequest, intent string, speechText string, justThisBotNum int) {
 	var intentParam string
 	var intentParamValue string
 	var newIntent string
@@ -248,10 +248,10 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string) {
 			intentParams = map[string]string{intentParam: intentParamValue}
 		}
 	}
-	IntentPass(req, newIntent, speechText, intentParams, isParam)
+	IntentPass(req, newIntent, speechText, intentParams, isParam, justThisBotNum)
 }
 
-func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText string) {
+func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText string, justThisBotNum int) {
 	// intent.go detects if the stream uses opus or PCM.
 	// If the stream is PCM, it is likely a bot with 0.10.
 	// This accounts for the newer 0.10.1### builds.
@@ -475,5 +475,5 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 		isParam = false
 		intentParams = map[string]string{intentParam: intentParamValue}
 	}
-	IntentPass(req, newIntent, speechText, intentParams, isParam)
+	IntentPass(req, newIntent, speechText, intentParams, isParam, justThisBotNum)
 }
