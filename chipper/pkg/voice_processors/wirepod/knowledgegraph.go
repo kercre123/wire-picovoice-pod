@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"encoding/json"
 
+	"github.com/pkg/errors"
 	leopard "github.com/Picovoice/leopard/binding/go"
 	pb "github.com/digital-dream-labs/api/go/chipperpb"
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
@@ -20,6 +22,22 @@ var hclient houndify.Client
 var houndEnable bool = true
 
 var disableLiveTranscriptionKG bool = false
+
+func ParseSpokenResponse(serverResponseJSON string) (string, error) {
+	result := make(map[string]interface{})
+	err := json.Unmarshal([]byte(serverResponseJSON), &result)
+	if err != nil {
+		fmt.Println(err.Error())
+		return "", errors.New("failed to decode json")
+	}
+	if !strings.EqualFold(result["Status"].(string), "OK") {
+		return "", errors.New(result["ErrorMessage"].(string))
+	}
+	if result["NumToReturn"].(float64) < 1 {
+		return "", errors.New("no results to return")
+	}
+	return result["AllResults"].([]interface{})[0].(map[string]interface{})["SpokenResponse"].(string), nil
+}
 
 func InitHoundify() {
 	if os.Getenv("HOUNDIFY_ENABLED") == "true" {
@@ -60,7 +78,7 @@ func knowledgeAPI(sessionID string, spokenText string) string {
 		if err != nil {
 			fmt.Println(err)
 		}
-		robotWords, err := houndify.ParseWrittenResponse(serverResponse)
+		robotWords, err := ParseSpokenResponse(serverResponse)
 		if err != nil {
 			fmt.Println(err)
 		}
