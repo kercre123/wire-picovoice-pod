@@ -248,6 +248,7 @@ function makeSource() {
    }
    weatherKeyPrompt
    function weatherUnitPrompt() {
+   echo
    echo "What temperature unit would you like to use?"
    echo
    echo "1: Fahrenheit"
@@ -262,6 +263,54 @@ function makeSource() {
    }
    weatherUnitPrompt
    fi
+   function houndifyPrompt() {
+   echo
+   echo "Would you like to setup knowledge graph (I have a question) commands? This involves creating a free account at https://www.houndify.com/signup and putting in your Client Key and Client ID."
+   echo "NOTE: This will be a trial account and will not be free forever."
+   echo "This is not required, and if you choose 2 then placeholder values will be used. And if you change your mind later, just run ./setup.sh with the 5th option."
+   echo
+   echo "1: Yes"
+   echo "2: No"
+   read -p "Enter a number (2): " yn
+   case $yn in
+      "1" ) knowledgeSetup="true";;
+      "2" ) knowledgeSetup="false";;
+      "" ) knowledgeSetup="false";;
+      * ) echo "Please answer with 1 or 2."; houndifyPrompt;;
+   esac
+   }
+   houndifyPrompt
+   if [[ ${knowledgeSetup} == "true" ]]; then
+      function houndifyIDPrompt() {
+      echo
+      echo "Create an account at https://www.houndify.com/signup and enter the Client ID (not Key) it gives you."
+      echo "If you have changed your mind, enter Q to continue without knowledge graph commands."
+      echo
+      read -p "Enter your Client ID: " knowledgeID
+      if [[ ! -n ${knowledgeID} ]]; then
+         echo "You must enter a Houndify Client ID. If you have changed your mind, you may also enter Q to continue without weather commands."
+         houndifyIDPrompt
+      fi
+      if [[ ${knowledgeID} == "Q" ]]; then
+         knowledgeSetup="false";
+      fi
+      }
+      function houndifyKeyPrompt() {
+      echo
+      echo "Now enter the Houndify Client Key (not ID)."
+      echo
+      read -p "Enter your Client Key: " knowledgeKey
+      if [[ ! -n ${knowledgeKey} ]]; then
+         echo "You must enter a Houndify Client Key."
+         houndifyKeyPrompt
+      fi
+      if [[ ${knowledgeKey} == "Q" ]]; then
+         knowledgeSetup="false";
+      fi
+      }
+      houndifyIDPrompt
+      houndifyKeyPrompt
+   fi
    echo "export DDL_RPC_PORT=${port}" > source.sh
    echo 'export DDL_RPC_TLS_CERTIFICATE=$(cat ../certs/cert.crt)' >> source.sh
    echo 'export DDL_RPC_TLS_KEY=$(cat ../certs/cert.key)' >> source.sh
@@ -272,6 +321,13 @@ function makeSource() {
       echo "export WEATHERAPI_UNIT=${weatherUnit}" >> source.sh
    else 
       echo "export WEATHERAPI_ENABLED=false" >> source.sh
+   fi
+   if [[ ${knowledgeSetup} == "true" ]]; then
+      echo "export HOUNDIFY_ENABLED=true" >> source.sh
+      echo "export HOUNDIFY_CLIENT_KEY=${knowledgeKey}" >> source.sh
+      echo "export HOUNDIFY_CLIENT_ID=${knowledgeID}" >> source.sh
+   else 
+      echo "export HOUNDIFY_ENABLED=false" >> source.sh
    fi
    echo "export LEOPARD_APIKEY=${picovoiceKey}" >> source.sh
    echo "export DEBUG_LOGGING=true" >> source.sh

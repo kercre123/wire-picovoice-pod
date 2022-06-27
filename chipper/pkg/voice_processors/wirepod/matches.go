@@ -17,7 +17,7 @@ var newYearList = []string{"fireworks", "new year", "happy new", "happy to", "ha
 	"i never", "knew her", "hobhouse", "bennie"}
 var holidaysList = []string{"he holds", "christmas", "behold", "holiday"}
 var signInAlexaList = []string{"in intellect", "fine in electa", "in alex", "ing alex", "in an elect", "to alex",
-	"in angelica"}
+	"in angelica", "up alexa"}
 var signOutAlexaList = []string{"in outlet", "i now of elea", "out alexa", "out of ale"}
 var forwardList = []string{"forward", "for ward", "for word"}
 var turnAroundList = []string{"around", "one eighty", "one ate he"}
@@ -42,7 +42,7 @@ var volumeUpList = []string{"all you up", "volume up", "up volume", "up the volu
 var lookAtMeList = []string{"stare", "at me"}
 var volumeSpecificList = []string{"all you", "volume", "loudness"}
 var shutUpList = []string{"shut up"}
-var helloList = []string{"hello", "are you", "high", "below", "little", "follow"}
+var helloList = []string{"hello", "are you", "high", "below", "little", "follow", "for you"}
 var comeList = []string{"come", "to me"}
 var loveList = []string{"love", "dove"}
 var questionList = []string{"question", "weston"}

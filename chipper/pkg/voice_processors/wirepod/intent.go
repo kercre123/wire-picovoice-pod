@@ -105,67 +105,63 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 	}()
 	go func() {
 		for doSTT == true {
-			if micData != nil {
-				if die == false {
-					if voiceTimer > 0 {
-						if sayStarting == true {
-							if debugLogging == true {
-								fmt.Printf("Starting transcription...")
-							}
-							sayStarting = false
-						}
-						processOneData := micData
-						transcription1Raw, err := leopardSTT.Process(processOneData)
-						if err != nil {
-							log.Println(err)
-						}
-						transcription1 = strings.ToLower(transcription1Raw)
-						if debugLogging == true {
-							fmt.Printf("\rBot " + strconv.Itoa(botNum) + " Transcription: " + transcription1)
-						}
-						if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
-							transcribedText = transcription1
-							if debugLogging == true {
-								fmt.Printf("\n")
-							}
-							die = true
-							break
-						} else if voiceTimer == 7 {
-							transcribedText = transcription2
-							if debugLogging == true {
-								fmt.Printf("\n")
-							}
-							die = true
-							break
-						}
-						time.Sleep(time.Millisecond * 150)
-						processTwoData := micData
-						transcription2Raw, err := leopardSTT.Process(processTwoData)
-						if err != nil {
-							log.Println(err)
-						}
-						transcription2 = strings.ToLower(transcription2Raw)
-						if debugLogging == true {
-							fmt.Printf("\rBot " + strconv.Itoa(botNum) + " Transcription: " + transcription2)
-						}
-						if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
-							transcribedText = transcription1
-							if debugLogging == true {
-								fmt.Printf("\n")
-							}
-							die = true
-							break
-						} else if voiceTimer == 7 {
-							transcribedText = transcription2
-							if debugLogging == true {
-								fmt.Printf("\n")
-							}
-							die = true
-							break
-						}
-						time.Sleep(time.Millisecond * 150)
+			if micData != nil && die == false && voiceTimer > 0 {
+				if sayStarting == true {
+					if debugLogging == true {
+						fmt.Printf("Starting transcription...")
 					}
+					sayStarting = false
 				}
+				processOneData := micData
+				transcription1Raw, err := leopardSTT.Process(processOneData)
+				if err != nil {
+					log.Println(err)
+				}
+				transcription1 = strings.ToLower(transcription1Raw)
+				if debugLogging == true {
+					fmt.Printf("\rBot " + strconv.Itoa(botNum) + " Transcription: " + transcription1)
+				}
+				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
+					transcribedText = transcription1
+					if debugLogging == true {
+						fmt.Printf("\n")
+					}
+					die = true
+					break
+				} else if voiceTimer == 7 {
+					transcribedText = transcription2
+					if debugLogging == true {
+						fmt.Printf("\n")
+					}
+					die = true
+					break
+				}
+				time.Sleep(time.Millisecond * 150)
+				processTwoData := micData
+				transcription2Raw, err := leopardSTT.Process(processTwoData)
+				if err != nil {
+					log.Println(err)
+				}
+				transcription2 = strings.ToLower(transcription2Raw)
+				if debugLogging == true {
+					fmt.Printf("\rBot " + strconv.Itoa(botNum) + " Transcription: " + transcription2)
+				}
+				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
+					transcribedText = transcription1
+					if debugLogging == true {
+						fmt.Printf("\n")
+					}
+					die = true
+					break
+				} else if voiceTimer == 7 {
+					transcribedText = transcription2
+					if debugLogging == true {
+						fmt.Printf("\n")
+					}
+					die = true
+					break
+				}
+				time.Sleep(time.Millisecond * 150)
 			}
 		}
 	}()

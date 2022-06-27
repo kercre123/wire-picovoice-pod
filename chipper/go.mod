@@ -10,6 +10,7 @@ require (
 	github.com/digital-dream-labs/opus-go v0.0.0-20201230195736-934a8a9e0a1e // indirect
 	github.com/go-audio/audio v1.0.0 // indirect
 	github.com/go-audio/wav v1.1.0 // indirect
+	github.com/soundhound/houndify-sdk-go v0.3.4 // indirect
 	google.golang.org/grpc v1.32.0
 	gopkg.in/pipe.v2 v2.0.0-20140414041502-3c2ca4d52544 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200605160147-a5ece683394c // indirect

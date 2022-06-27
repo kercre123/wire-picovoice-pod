@@ -12,20 +12,59 @@ import (
 	pb "github.com/digital-dream-labs/api/go/chipperpb"
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
 	opus "github.com/digital-dream-labs/opus-go/opus"
+	"github.com/soundhound/houndify-sdk-go"
 )
+
+var hclient houndify.Client
+var houndEnable bool = true
+
+func InitHoundify() {
+	if os.Getenv("HOUNDIFY_ENABLED") == "true" {
+		if os.Getenv("HOUNDIFY_CLIENT_ID") == "" {
+			fmt.Println("Houndify Client ID not provided.")
+			houndEnable = false
+		}
+		if os.Getenv("HOUNDIFY_CLIENT_KEY") == "" {
+			fmt.Println("Houndify Client Key not provided.")
+			houndEnable = false
+		}
+		if houndEnable == true {
+			hclient = houndify.Client{
+				ClientID:  os.Getenv("HOUNDIFY_CLIENT_ID"),
+				ClientKey: os.Getenv("HOUNDIFY_CLIENT_KEY"),
+			}
+			fmt.Println("Houndify initialized!")
+		}
+	} else {
+		houndEnable = false
+	}
+}
 
 var NoResult string = "NoResultCommand"
 var NoResultSpoken string
 
 var botNumKG int = 0
 
-func knowledgeAPI(spokenText string) string {
-	// This is where you would make a call to an API
-	if strings.Contains(spokenText, "the president of the united states") {
-		return "The president of the United States is Joe Biden."
-	} else if spokenText == "who is anki" || spokenText == "who was anki" || spokenText == "with mangchi" || spokenText == "is on key" || spokenText == "was on key" {
-		return "Anki was the best consumer robotics company. Anki and it's people will be missed."
+func knowledgeAPI(sessionID string, spokenText string) string {
+	if houndEnable == true {
+		hReq := houndify.TextRequest{
+			Query:             spokenText,
+			UserID:            "victor",
+			RequestID:         sessionID,
+			RequestInfoFields: make(map[string]interface{}),
+		}
+		serverResponse, err := hclient.TextSearch(hReq)
+		if err != nil {
+			fmt.Println(err)
+		}
+		robotWords, err := houndify.ParseWrittenResponse(serverResponse)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("Houndify Response: " + robotWords)
+		return robotWords
 	} else {
+		fmt.Println("Houndify is not enabled, using placeholder.")
 		return "This is a placeholder. You said " + spokenText
 	}
 }
@@ -165,7 +204,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 			break
 		}
 	}
-	NoResultSpoken = knowledgeAPI(transcribedText)
+	NoResultSpoken = knowledgeAPI(req.Session, transcribedText)
 	kg := pb.KnowledgeGraphResponse{
 		Session:     req.Session,
 		DeviceId:    req.Device,

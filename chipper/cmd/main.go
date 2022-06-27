@@ -60,6 +60,7 @@ func startServer() {
 
 	p, err := wirepod.New()
 	wirepod.InitLeopard()
+	wirepod.InitHoundify()
 	if err != nil {
 		log.Fatal(err)
 	}
