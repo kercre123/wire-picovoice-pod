@@ -46,7 +46,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 if [[ ! -d ./chipper ]]; then
-   echo "Script is not running in the jank-escape-pod/ directory or chipper folder is missing. Exiting."
+   echo "Script is not running in the wire-picovoice-pod/ directory or chipper folder is missing. Exiting."
    exit 1
 fi
 
@@ -63,7 +63,8 @@ function getPackages() {
          pacman -Sy --noconfirm
          sudo pacman -S --noconfirm wget openssl net-tools sox opus make iproute2 opusfile
       elif [[ ${TARGET} == "macos" ]]; then
-         brew install opusfile opus pkg-config gcc golang
+         echo "macOS is detected, expecting packages to be installed. Brew does not like being run as root"
+         #brew install opusfile opus pkg-config gcc golang
       fi
       touch ./vector-cloud/packagesGotten
       echo

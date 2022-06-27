@@ -50,7 +50,7 @@ cd chipper
 sudo ./start.sh
 ```
 
-### Windows
+### Windows 10/11
 
 1. Install WSL (Windows Subsystem for Linux)
 	- Open Powershell
@@ -62,7 +62,7 @@ sudo ./start.sh
 	- Open Powershell
 	- Run `ipconfig`
 	- Find your computer's IPv4 address and note it somewhere. It usually starts with 10.0. or 192.168.
-3. Install wire-pod
+3. Install wire-picovoice-pod
 	- Follow the Linux instructions from above
 	- Enter the IP you got from `ipconfig` earlier instead of the one provided by setup.sh
 	- Use the default port and do not enter a different one
@@ -74,13 +74,16 @@ sudo ./start.sh
 	- Go to your Downloads folder in File Explorer and Right Click -> Run as administrator
 5. Try a voice command
 
-### macOS
+### macOS 10.15 and above
 
 1. Open Terminal
-2. Install brew
-	- Run `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+2. Install required packages
+	- Install brew with this command:
+	- `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+	- Install required packages with this command:
+	- `brew install opusfile opus pkg-config gcc golang`
 3. Install wire-picovoice-pod
-	- Follow the Linux instructions
+	- Follow the Linux instructions, located above the Windows instructions
 4. Try a voice command
 
 ## Configure specific bots
