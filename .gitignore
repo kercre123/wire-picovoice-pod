@@ -10,3 +10,4 @@
 /ssh_root_key
 /chipper/botConfigs
 /chipper/gotSys
+/wire-picovoice-pod.service
