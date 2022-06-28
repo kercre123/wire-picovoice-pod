@@ -18,6 +18,7 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 	var botLocation string = "San Francisco"
 	var botUnits string = "F"
 	var botPlaySpecific bool = false
+	var botIsEarlyOpus bool = false
 	if _, err := os.Stat("./botConfigs/" + req.Device + ".json"); err == nil {
 		if debugLogging == true {
 			fmt.Println("Found bot config file for " + req.Device)
@@ -30,12 +31,14 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 			Location        string `json:"location"`
 			Units           string `json:"units"`
 			UsePlaySpecific bool   `json:"use_play_specific"`
+			IsEarlyOpus     bool   `json:"is_early_opus"`
 		}
 		var botConfJSON botConfigJSON
 		json.Unmarshal(botConfigByte, &botConfJSON)
 		botLocation = botConfJSON.Location
 		botUnits = botConfJSON.Units
 		botPlaySpecific = botConfJSON.UsePlaySpecific
+		botIsEarlyOpus = botConfJSON.IsEarlyOpus
 	}
 	if botPlaySpecific == true {
 		if strings.Contains(intent, "intent_play_blackjack") {
@@ -79,6 +82,27 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 			intentParam = ""
 			intentParamValue = ""
 			isParam = false
+			intentParams = map[string]string{intentParam: intentParamValue}
+		}
+	}
+	if botIsEarlyOpus == true {
+		if strings.Contains(intent, "intent_imperative_praise") {
+			isParam = false
+			newIntent = "intent_imperative_affirmative"
+			intentParam = ""
+			intentParamValue = ""
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_imperative_abuse") {
+			isParam = false
+			newIntent = "intent_imperative_negative"
+			intentParam = ""
+			intentParamValue = ""
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_imperative_love") {
+			isParam = false
+			newIntent = "intent_greeting_hello"
+			intentParam = ""
+			intentParamValue = ""
 			intentParams = map[string]string{intentParam: intentParamValue}
 		}
 	}

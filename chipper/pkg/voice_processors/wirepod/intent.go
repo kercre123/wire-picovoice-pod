@@ -125,9 +125,18 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 	botNum = botNum + 1
 	justThisBotNum := botNum
 	if botNum > 1 {
+		if debugLogging == true {
+			fmt.Println("Multiple bots are streaming, live transcription disabled")
+		}
 		disableLiveTranscription = true
 	} else {
 		disableLiveTranscription = false
+	}
+	if os.Getenv("DISABLE_LIVE_TRANSCRIPTION") == "true" {
+		if debugLogging == true {
+			fmt.Println("DISABLE_LIVE_TRANSCRIPTION is true, live transcription disabled")
+		}
+		disableLiveTranscription = true
 	}
 	if justThisBotNum == 1 {
 		leopardSTT = leopardSTT1
@@ -180,7 +189,6 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 	}()
 	go func() {
 		if botNum > 1 {
-			fmt.Println("Multiple bots are streaming, live transcription disabled")
 			disableLiveTranscription = true
 		}
 		for doSTT == true {

@@ -1,6 +1,7 @@
 package wirepod
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -8,13 +9,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"encoding/json"
 
-	"github.com/pkg/errors"
 	leopard "github.com/Picovoice/leopard/binding/go"
 	pb "github.com/digital-dream-labs/api/go/chipperpb"
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
 	opus "github.com/digital-dream-labs/opus-go/opus"
+	"github.com/pkg/errors"
 	"github.com/soundhound/houndify-sdk-go"
 )
 
@@ -36,7 +36,7 @@ func ParseSpokenResponse(serverResponseJSON string) (string, error) {
 	if result["NumToReturn"].(float64) < 1 {
 		return "", errors.New("no results to return")
 	}
-	return result["AllResults"].([]interface{})[0].(map[string]interface{})["SpokenResponse"].(string), nil
+	return result["AllResults"].([]interface{})[0].(map[string]interface{})["SpokenResponseLong"].(string), nil
 }
 
 func InitHoundify() {
@@ -118,6 +118,9 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 	} else {
 		disableLiveTranscription = false
 	}
+	if os.Getenv("DISABLE_LIVE_TRANSCRIPTION") == "true" {
+		disableLiveTranscription = true
+	}
 	if justThisBotNum == 1 {
 		leopardSTT = leopardSTT1
 	} else if justThisBotNum == 2 {
@@ -181,7 +184,6 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 	}()
 	go func() {
 		if botNumKG > 1 {
-			fmt.Println("(KG) Multiple bots are streaming, live transcription disabled")
 			disableLiveTranscriptionKG = true
 		}
 		for doSTT == true {

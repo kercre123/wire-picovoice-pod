@@ -49,6 +49,8 @@ if [[ ! -n ${VICV1} ]]; then
     echo "Usage: ./botSetup.sh <esn> <firmware-prefix> <location> <units>"
 fi
 
+IS_EARLY_OPUS="false"
+
 if [[ ${VICV1} == 1 ]]; then
     if [[ ${VICV2} > 5 ]]; then
         USE_PLAY_SPECIFIC="false"
@@ -57,6 +59,7 @@ if [[ ${VICV1} == 1 ]]; then
     fi
 elif [[ ${VICV1} == 0 ]]; then
     USE_PLAY_SPECIFIC="true"
+    IS_EARLY_OPUS="true"
 elif [[ ${VICV1} == 2 ]]; then
     USE_PLAY_SPECIFIC="false"
 else
@@ -75,6 +78,9 @@ echo -n ${UNITS} >> botConfigs/${ESN}.json
 echo -n '", ' >> botConfigs/${ESN}.json
 echo -n '"use_play_specific": ' >> botConfigs/${ESN}.json
 echo -n "${USE_PLAY_SPECIFIC}" >> botConfigs/${ESN}.json
+echo -n ', ' >> botConfigs/${ESN}.json
+echo -n '"is_early_opus": ' >> botConfigs/${ESN}.json
+echo -n "${IS_EARLY_OPUS}" >> botConfigs/${ESN}.json
 echo "}" >> botConfigs/${ESN}.json
 
 echo "Done! ${ESN} is configured."
