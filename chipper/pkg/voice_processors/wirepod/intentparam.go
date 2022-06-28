@@ -39,6 +39,7 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 		botUnits = botConfJSON.Units
 		botPlaySpecific = botConfJSON.UsePlaySpecific
 		botIsEarlyOpus = botConfJSON.IsEarlyOpus
+		fmt.Println(botIsEarlyOpus)
 	}
 	if botPlaySpecific == true {
 		if strings.Contains(intent, "intent_play_blackjack") {
@@ -82,27 +83,6 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 			intentParam = ""
 			intentParamValue = ""
 			isParam = false
-			intentParams = map[string]string{intentParam: intentParamValue}
-		}
-	}
-	if botIsEarlyOpus == true {
-		if strings.Contains(intent, "intent_imperative_praise") {
-			isParam = false
-			newIntent = "intent_imperative_affirmative"
-			intentParam = ""
-			intentParamValue = ""
-			intentParams = map[string]string{intentParam: intentParamValue}
-		} else if strings.Contains(intent, "intent_imperative_abuse") {
-			isParam = false
-			newIntent = "intent_imperative_negative"
-			intentParam = ""
-			intentParamValue = ""
-			intentParams = map[string]string{intentParam: intentParamValue}
-		} else if strings.Contains(intent, "intent_imperative_love") {
-			isParam = false
-			newIntent = "intent_greeting_hello"
-			intentParam = ""
-			intentParamValue = ""
 			intentParams = map[string]string{intentParam: intentParamValue}
 		}
 	}
@@ -269,6 +249,27 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 			intentParam = ""
 			intentParamValue = ""
 			isParam = false
+			intentParams = map[string]string{intentParam: intentParamValue}
+		}
+	}
+	if botIsEarlyOpus == true {
+		if strings.Contains(intent, "intent_imperative_praise") {
+			isParam = false
+			newIntent = "intent_imperative_affirmative"
+			intentParam = ""
+			intentParamValue = ""
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_imperative_abuse") {
+			isParam = false
+			newIntent = "intent_imperative_negative"
+			intentParam = ""
+			intentParamValue = ""
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_imperative_love") {
+			isParam = false
+			newIntent = "intent_greeting_hello"
+			intentParam = ""
+			intentParamValue = ""
 			intentParams = map[string]string{intentParam: intentParamValue}
 		}
 	}
