@@ -39,7 +39,6 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 		botUnits = botConfJSON.Units
 		botPlaySpecific = botConfJSON.UsePlaySpecific
 		botIsEarlyOpus = botConfJSON.IsEarlyOpus
-		fmt.Println(botIsEarlyOpus)
 	}
 	if botPlaySpecific == true {
 		if strings.Contains(intent, "intent_play_blackjack") {

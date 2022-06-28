@@ -207,7 +207,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 				transcription1 = strings.ToLower(transcription1Raw)
 				if debugLogging == true {
 					if disableLiveTranscription == false {
-						fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription1)
+						fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription1)
 					}
 				}
 				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
@@ -216,7 +216,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 						if disableLiveTranscription == false {
 							fmt.Printf("\n")
 						} else {
-							fmt.Println("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+							fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
 						}
 					}
 					die = true
@@ -227,7 +227,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 						if disableLiveTranscription == false {
 							fmt.Printf("\n")
 						} else {
-							fmt.Println("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+							fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
 						}
 					}
 					die = true
@@ -242,7 +242,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 				transcription2 = strings.ToLower(transcription2Raw)
 				if debugLogging == true {
 					if disableLiveTranscription == false {
-						fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription2)
+						fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription2)
 					}
 				}
 				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
@@ -251,7 +251,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 						if disableLiveTranscription == false {
 							fmt.Printf("\n")
 						} else {
-							fmt.Println("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+							fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
 						}
 					}
 					die = true
@@ -262,7 +262,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 						if disableLiveTranscription == false {
 							fmt.Printf("\n")
 						} else {
-							fmt.Println("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+							fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
 						}
 					}
 					die = true
