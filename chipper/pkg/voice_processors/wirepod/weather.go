@@ -131,7 +131,7 @@ func weatherParser(speechText string, botLocation string, botUnits string) (stri
 	var apiLocation string
 	var speechLocation string
 	if strings.Contains(speechText, " in ") {
-		splitPhrase := strings.SplitAfter(speechText, "in")
+		splitPhrase := strings.SplitAfter(speechText, " in ")
 		speechLocation = strings.TrimSpace(splitPhrase[1])
 		if len(splitPhrase) == 3 {
 			speechLocation = speechLocation + " " + strings.TrimSpace(splitPhrase[2])

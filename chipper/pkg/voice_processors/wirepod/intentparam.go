@@ -155,14 +155,14 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 		var nameSplitter string
 		isParam = true
 		newIntent = intent
-		if strings.Contains(speechText, "is") {
-			nameSplitter = "is"
+		if strings.Contains(speechText, " is ") {
+			nameSplitter = " is "
 		} else if strings.Contains(speechText, "'s") {
 			nameSplitter = "'s"
 		} else if strings.Contains(speechText, "names") {
 			nameSplitter = "names"
 		}
-		if strings.Contains(speechText, "is") || strings.Contains(speechText, "'s") || strings.Contains(speechText, "names") {
+		if strings.Contains(speechText, " is ") || strings.Contains(speechText, "'s") || strings.Contains(speechText, "names") {
 			splitPhrase := strings.SplitAfter(speechText, nameSplitter)
 			username = strings.TrimSpace(splitPhrase[1])
 			if len(splitPhrase) == 3 {
