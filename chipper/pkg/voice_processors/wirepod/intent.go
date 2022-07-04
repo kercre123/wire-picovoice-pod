@@ -15,8 +15,6 @@ import (
 	opus "github.com/digital-dream-labs/opus-go/opus"
 )
 
-var leopardSTT leopard.Leopard
-
 var debugLogging bool
 
 var botNum int = 0
@@ -34,72 +32,6 @@ func check(e error) {
 	default location, unit settings, etc. Helpful for weather.
 		- current workaround: setup specific bots with botSetup.sh
 */
-
-var leopardSTT1 leopard.Leopard
-var leopardSTT2 leopard.Leopard
-var leopardSTT3 leopard.Leopard
-var leopardSTT4 leopard.Leopard
-var leopardSTT5 leopard.Leopard
-
-func initLeopard1(leopardKey string) {
-	leopardSTT1 = leopard.Leopard{AccessKey: leopardKey}
-	err := leopardSTT1.Init()
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println("Initialized Picovoice Leopard 1")
-}
-
-func initLeopard2(leopardKey string) {
-	leopardSTT2 = leopard.Leopard{AccessKey: leopardKey}
-	err := leopardSTT2.Init()
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println("Initialized Picovoice Leopard 2")
-}
-
-func initLeopard3(leopardKey string) {
-	leopardSTT3 = leopard.Leopard{AccessKey: leopardKey}
-	err := leopardSTT3.Init()
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println("Initialized Picovoice Leopard 3")
-}
-
-func initLeopard4(leopardKey string) {
-	leopardSTT4 = leopard.Leopard{AccessKey: leopardKey}
-	err := leopardSTT4.Init()
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println("Initialized Picovoice Leopard 4")
-}
-
-func initLeopard5(leopardKey string) {
-	leopardSTT5 = leopard.Leopard{AccessKey: leopardKey}
-	err := leopardSTT5.Init()
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println("Initialized Picovoice Leopard 5")
-}
-
-func InitLeopard() {
-	leopardKey := os.Getenv("LEOPARD_APIKEY")
-	if leopardKey == "" {
-		fmt.Println("You must set LEOPARD_APIKEY to a value.")
-		os.Exit(1)
-	}
-	fmt.Println("Initializing Picovoice Leopards...")
-	go initLeopard1(leopardKey)
-	go initLeopard2(leopardKey)
-	go initLeopard3(leopardKey)
-	go initLeopard4(leopardKey)
-	initLeopard5(leopardKey)
-	time.Sleep(time.Millisecond * 1500)
-}
 
 func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, error) {
 	var voiceTimer int = 0
@@ -138,21 +70,13 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		}
 		disableLiveTranscription = true
 	}
-	if justThisBotNum == 1 {
-		leopardSTT = leopardSTT1
-	} else if justThisBotNum == 2 {
-		leopardSTT = leopardSTT2
-	} else if justThisBotNum == 3 {
-		leopardSTT = leopardSTT3
-	} else if justThisBotNum == 4 {
-		leopardSTT = leopardSTT4
-	} else if justThisBotNum == 5 {
-		leopardSTT = leopardSTT5
-	} else {
+	if botNum > picovoiceInstances {
 		fmt.Println("Too many bots are connected, sending error to bot " + strconv.Itoa(justThisBotNum))
 		IntentPass(req, "intent_system_noaudio", "Too many bots, max is 5", map[string]string{"error": "EOF"}, true, justThisBotNum)
 		botNum = botNum - 1
 		return nil, nil
+	} else {
+		leopardSTT = leopardSTTArray[botNum-1]
 	}
 	if debugLogging == true {
 		fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " ESN: " + req.Device)
@@ -207,7 +131,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 				transcription1 = strings.ToLower(transcription1Raw)
 				if debugLogging == true {
 					if disableLiveTranscription == false {
-						fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription1)
+						fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription1)
 					}
 				}
 				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
@@ -233,7 +157,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 					die = true
 					break
 				}
-				time.Sleep(time.Millisecond * 150)
+				time.Sleep(time.Millisecond * 200)
 				processTwoData := micData
 				transcription2Raw, err := leopardSTT.Process(processTwoData)
 				if err != nil {
@@ -242,7 +166,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 				transcription2 = strings.ToLower(transcription2Raw)
 				if debugLogging == true {
 					if disableLiveTranscription == false {
-						fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription2)
+						fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription2)
 					}
 				}
 				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
@@ -268,7 +192,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 					die = true
 					break
 				}
-				time.Sleep(time.Millisecond * 150)
+				time.Sleep(time.Millisecond * 200)
 			}
 		}
 	}()

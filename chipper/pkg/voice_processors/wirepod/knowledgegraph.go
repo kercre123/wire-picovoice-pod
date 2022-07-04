@@ -112,6 +112,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 		}
 	}
 	botNumKG = botNumKG + 1
+	botNum = botNum + 1
 	justThisBotNum := botNumKG
 	if botNum > 1 {
 		disableLiveTranscription = true
@@ -121,17 +122,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 	if os.Getenv("DISABLE_LIVE_TRANSCRIPTION") == "true" {
 		disableLiveTranscription = true
 	}
-	if justThisBotNum == 1 {
-		leopardSTT = leopardSTT1
-	} else if justThisBotNum == 2 {
-		leopardSTT = leopardSTT2
-	} else if justThisBotNum == 3 {
-		leopardSTT = leopardSTT3
-	} else if justThisBotNum == 4 {
-		leopardSTT = leopardSTT4
-	} else if justThisBotNum == 5 {
-		leopardSTT = leopardSTT5
-	} else {
+	if botNum > picovoiceInstances {
 		fmt.Println("Too many bots are connected, sending error to bot " + strconv.Itoa(justThisBotNum))
 		NoResultSpoken = knowledgeAPI(req.Session, transcribedText)
 		kg := pb.KnowledgeGraphResponse{
@@ -141,6 +132,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 			SpokenText:  NoResultSpoken,
 		}
 		botNumKG = botNumKG - 1
+		botNum = botNum - 1
 		if err := req.Stream.Send(&kg); err != nil {
 			return nil, err
 		}
@@ -148,6 +140,8 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 			Intent: &kg,
 		}, nil
 		return nil, nil
+	} else {
+		leopardSTT = leopardSTTArray[botNum-1]
 	}
 	if debugLogging == true {
 		fmt.Println("(KG) Bot " + strconv.Itoa(botNumKG) + " ESN: " + req.Device)
@@ -183,7 +177,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 		}
 	}()
 	go func() {
-		if botNumKG > 1 {
+		if botNum > 1 {
 			disableLiveTranscriptionKG = true
 		}
 		for doSTT == true {
@@ -290,6 +284,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 		SpokenText:  NoResultSpoken,
 	}
 	botNumKG = botNumKG - 1
+	botNum = botNum - 1
 	if err := req.Stream.Send(&kg); err != nil {
 		return nil, err
 	}

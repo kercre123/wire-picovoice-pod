@@ -348,7 +348,7 @@ function makeSource() {
    else 
       echo "export HOUNDIFY_ENABLED=false" >> source.sh
    fi
-   echo "export LEOPARD_APIKEY=${picovoiceKey}" >> source.sh
+   echo "export PICOVOICE_APIKEY=${picovoiceKey}" >> source.sh
    echo "export DEBUG_LOGGING=true" >> source.sh
    cd ..
    echo
