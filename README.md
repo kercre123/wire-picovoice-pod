@@ -147,17 +147,16 @@ There are many environment variables exported in `./chipper/source.sh`. Here are
 
 ### PICOVOICE_INSTANCES
 
-- Integer, default is 5. 
+- Integer, default is 3. 
 - This is how many instances of Picovoice Leopard (or Rhino if you have selected that) get initiated. This is equal to how many bots can be streaming at once to chipper. If the number of bots streaming exceeds this number, it will send `intent_system_noaudio`.
 
 ### PICOVOICE_MODE
 
-- String, default is `OnlyLeopard`.
+- String, default is `LeopardAndRhino`.
 
 Possible options:
 - `OnlyLeopard`
-	- Default
-	- Transcribes the voice stream to text and processes that text with a list of matches
+	- Transcribes the voice stream to text and processes that text with a list of utterance matches
 - `OnlyRhino`
 	- Uses Picovoice Rhino to transcribe the voice stream directly into an intent
 	- This is much more accurate than Leopard, but there is a constant list of utterances for each intent which means the following commands don't work:
@@ -171,8 +170,8 @@ Possible options:
 	- With those last three commands there is a known list of possible utterances that can be easily made, but the first three require true speech-to-text to properly parse out what they need for the command to be sent correctly
 	- This repo comes included with a completed .rhn file for both amd64 and arm
 - `LeopardAndRhino`
-	- Uses Picovoice Rhino to transcribe the voice stream directly into an intent, but if it fails, it falls back to Leopard.
-	- Every command works and is very accurate. The hope is for this to become the default at some point.
+	- Uses Picovoice Rhino to transcribe the voice stream directly into an intent, and if it fails, it falls back to Leopard.
+	- Every command works and is very accurate and fast.
 - `OlderPi`
 	- Same as `OnlyRhino` and sets `PICOVOICE_INSTANCES` to 1
 	- This is meant for less powerful Raspberry Pis like the 3B+ and the Pi Zero 2 W

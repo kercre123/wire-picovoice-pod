@@ -41,51 +41,6 @@ func paramCheckerSlots(req *vtt.IntentRequest, intent string, slots map[string]s
 		botPlaySpecific = botConfJSON.UsePlaySpecific
 		botIsEarlyOpus = botConfJSON.IsEarlyOpus
 	}
-	if botPlaySpecific == true {
-		if strings.Contains(intent, "intent_play_blackjack") {
-			isParam = true
-			newIntent = "intent_play_specific_extend"
-			intentParam = "entity_behavior"
-			intentParamValue = "blackjack"
-			intentParams = map[string]string{intentParam: intentParamValue}
-		} else if strings.Contains(intent, "intent_play_fistbump") {
-			isParam = true
-			newIntent = "intent_play_specific_extend"
-			intentParam = "entity_behavior"
-			intentParamValue = "fist_bump"
-			intentParams = map[string]string{intentParam: intentParamValue}
-		} else if strings.Contains(intent, "intent_play_rollcube") {
-			isParam = true
-			newIntent = "intent_play_specific_extend"
-			intentParam = "entity_behavior"
-			intentParamValue = "roll_cube"
-			intentParams = map[string]string{intentParam: intentParamValue}
-		} else if strings.Contains(intent, "intent_play_popawheelie") {
-			isParam = true
-			newIntent = "intent_play_specific_extend"
-			intentParam = "entity_behavior"
-			intentParamValue = "pop_a_wheelie"
-			intentParams = map[string]string{intentParam: intentParamValue}
-		} else if strings.Contains(intent, "intent_play_pickupcube") {
-			isParam = true
-			newIntent = "intent_play_specific_extend"
-			intentParam = "entity_behavior"
-			intentParamValue = "pick_up_cube"
-			intentParams = map[string]string{intentParam: intentParamValue}
-		} else if strings.Contains(intent, "intent_play_keepaway") {
-			isParam = true
-			newIntent = "intent_play_specific_extend"
-			intentParam = "entity_behavior"
-			intentParamValue = "keep_away"
-			intentParams = map[string]string{intentParam: intentParamValue}
-		} else {
-			newIntent = intent
-			intentParam = ""
-			intentParamValue = ""
-			isParam = false
-			intentParams = map[string]string{intentParam: intentParamValue}
-		}
-	}
 	if strings.Contains(intent, "volume") {
 		if slots["volume"] != "" {
 			newIntent = "intent_imperative_volumelevel_extend"
