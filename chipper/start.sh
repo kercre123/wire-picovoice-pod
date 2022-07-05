@@ -9,6 +9,22 @@ if [[ -d ./chipper ]]; then
    cd chipper
 fi
 
+UNAME=$(uname -a)
+
+if [[ "${UNAME}" == *"x86_64"* ]]; then
+   export GOARCH="amd64"
+   echo "amd64 architecture confirmed."
+elif [[ "${UNAME}" == *"aarch64"* ]]; then
+   export GOARCH="arm64"
+   echo "aarch64 architecture confirmed."
+elif [[ "${UNAME}" == *"armv7l"* ]]; then
+   export GOARCH="arm"
+   echo "armv7l architecture confirmed."
+else
+   echo "Your CPU architecture not supported. This script currently supports x86_64, aarch64, and armv7l."
+   exit 1
+fi
+
 #if [[ ! -f ./chipper ]]; then
 #   if [[ -f ./go.mod ]]; then
 #     echo "You need to build chipper first. This can be done with the setup.sh script."
