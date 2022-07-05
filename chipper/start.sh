@@ -25,6 +25,13 @@ else
    exit 1
 fi
 
+if [[ $OSTYPE == *"darwin"* ]]; then
+  export GOOS="darwin"
+else
+  export GOOS="linux"
+fi
+
+
 #if [[ ! -f ./chipper ]]; then
 #   if [[ -f ./go.mod ]]; then
 #     echo "You need to build chipper first. This can be done with the setup.sh script."
