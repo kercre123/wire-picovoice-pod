@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	leopard "github.com/Picovoice/leopard/binding/go"
+	rhino "github.com/Picovoice/rhino/binding/go/v2"
 )
 
 var leopardSTTArray []leopard.Leopard
+var rhinoSTIArray []rhino.Rhino
 var picovoiceInstancesOS string = os.Getenv("PICOVOICE_INSTANCES")
+var picovoiceModeOS string = os.Getenv("PICOVOICE_MODE")
 var picovoiceInstances int
 
 func InitPicovoice() {
@@ -39,10 +43,33 @@ func InitPicovoice() {
 	} else {
 		picovoiceKey = picovoiceKeyOS
 	}
+	if picovoiceModeOS == "" {
+		picovoiceModeOS = "OnlyLeopard"
+	} else {
+		if picovoiceModeOS != "OnlyLeopard" && picovoiceModeOS != "OnlyRhino" && picovoiceModeOS != "LeopardAndRhino" && picovoiceModeOS != "OlderPi" {
+			fmt.Println("PICOVOICE_MODE is not set to a valid value, using default value of OnlyLeopard")
+			picovoiceModeOS = "OnlyLeopard"
+		}
+	}
+	if picovoiceModeOS == "OlderPi" {
+		picovoiceInstances = 1
+		picovoiceModeOS = "OnlyRhino"
+	}
+	fmt.Println("Picovoice Mode: " + picovoiceModeOS)
 	fmt.Println("Initializing Picovoice Instances...")
 	for i := 0; i < picovoiceInstances; i++ {
 		fmt.Println("Initializing Picovoice Instance " + strconv.Itoa(i))
-		leopardSTTArray = append(leopardSTTArray, leopard.Leopard{AccessKey: picovoiceKey})
-		leopardSTTArray[i].Init()
+		if picovoiceModeOS == "OnlyLeopard" || picovoiceModeOS == "LeopardAndRhino" {
+			leopardSTTArray = append(leopardSTTArray, leopard.Leopard{AccessKey: picovoiceKey})
+			leopardSTTArray[i].Init()
+		}
+		if picovoiceModeOS == "OnlyRhino" || picovoiceModeOS == "LeopardAndRhino" {
+			if strings.Contains(os.Getenv("GOARCH"), "arm") {
+				rhinoSTIArray = append(rhinoSTIArray, rhino.NewRhino(picovoiceKey, "./armintents.rhn"))
+			} else {
+				rhinoSTIArray = append(rhinoSTIArray, rhino.NewRhino(picovoiceKey, "./amd64intents.rhn"))
+			}
+			rhinoSTIArray[i].Init()
+		}
 	}
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
 
 	leopard "github.com/Picovoice/leopard/binding/go"
+	rhino "github.com/Picovoice/rhino/binding/go/v2"
 	opus "github.com/digital-dream-labs/opus-go/opus"
 )
 
@@ -37,13 +38,22 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 	var voiceTimer int = 0
 	var transcription1 string = ""
 	var transcription2 string = ""
-	var transcribedText string
+	var transcribedText string = ""
 	var isOpus bool
-	var micData []int16
+	var micDataLeopard []int16
+	var micDataRhino [][]int16
 	var die bool = false
 	var doSTT bool = true
 	var sayStarting = true
 	var leopardSTT leopard.Leopard
+	var rhinoSTI rhino.Rhino
+	var leopardFallback bool = false
+	var numInRange int = 0
+	var oldDataLength int = 0
+	var rhinoDone bool = false
+	var successMatched bool = false
+	var transcribedIntent string
+	var transcribedSlots map[string]string
 	if os.Getenv("DEBUG_LOGGING") != "true" && os.Getenv("DEBUG_LOGGING") != "false" {
 		fmt.Println("No valid value for DEBUG_LOGGING, setting to true")
 		debugLogging = true
@@ -64,6 +74,9 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 	} else {
 		disableLiveTranscription = false
 	}
+	if picovoiceModeOS == "OnlyLeopard" {
+		leopardFallback = true
+	}
 	if os.Getenv("DISABLE_LIVE_TRANSCRIPTION") == "true" {
 		if debugLogging == true {
 			fmt.Println("DISABLE_LIVE_TRANSCRIPTION is true, live transcription disabled")
@@ -76,7 +89,12 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		botNum = botNum - 1
 		return nil, nil
 	} else {
-		leopardSTT = leopardSTTArray[botNum-1]
+		if picovoiceModeOS == "OnlyLeopard" || picovoiceModeOS == "LeopardAndRhino" {
+			leopardSTT = leopardSTTArray[botNum-1]
+		}
+		if picovoiceModeOS == "OnlyRhino" || picovoiceModeOS == "LeopardAndRhino" {
+			rhinoSTI = rhinoSTIArray[botNum-1]
+		}
 	}
 	if debugLogging == true {
 		fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " ESN: " + req.Device)
@@ -115,84 +133,88 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		if botNum > 1 {
 			disableLiveTranscription = true
 		}
-		for doSTT == true {
-			if micData != nil && die == false && voiceTimer > 0 {
-				if sayStarting == true {
-					if debugLogging == true {
-						fmt.Printf("Transcribing stream %d...\n", justThisBotNum)
-					}
-					sayStarting = false
-				}
-				processOneData := micData
-				transcription1Raw, err := leopardSTT.Process(processOneData)
-				if err != nil {
-					log.Println(err)
-				}
-				transcription1 = strings.ToLower(transcription1Raw)
-				if debugLogging == true {
-					if disableLiveTranscription == false {
-						fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription1)
-					}
-				}
-				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
-					transcribedText = transcription1
-					if debugLogging == true {
-						if disableLiveTranscription == false {
-							fmt.Printf("\n")
-						} else {
-							fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+		if picovoiceModeOS == "OnlyLeopard" || picovoiceModeOS == "LeopardAndRhino" {
+			for doSTT == true {
+				if leopardFallback == true {
+					if micDataLeopard != nil && die == false && voiceTimer > 0 {
+						if sayStarting == true {
+							if debugLogging == true {
+								fmt.Printf("Transcribing stream %d...\n", justThisBotNum)
+							}
+							sayStarting = false
 						}
-					}
-					die = true
-					break
-				} else if voiceTimer == 7 {
-					transcribedText = transcription2
-					if debugLogging == true {
-						if disableLiveTranscription == false {
-							fmt.Printf("\n")
-						} else {
-							fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						processOneData := micDataLeopard
+						transcription1Raw, err := leopardSTT.Process(processOneData)
+						if err != nil {
+							log.Println(err)
 						}
-					}
-					die = true
-					break
-				}
-				time.Sleep(time.Millisecond * 200)
-				processTwoData := micData
-				transcription2Raw, err := leopardSTT.Process(processTwoData)
-				if err != nil {
-					log.Println(err)
-				}
-				transcription2 = strings.ToLower(transcription2Raw)
-				if debugLogging == true {
-					if disableLiveTranscription == false {
-						fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription2)
-					}
-				}
-				if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
-					transcribedText = transcription1
-					if debugLogging == true {
-						if disableLiveTranscription == false {
-							fmt.Printf("\n")
-						} else {
-							fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						transcription1 = strings.ToLower(transcription1Raw)
+						if debugLogging == true {
+							if disableLiveTranscription == false {
+								fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription1)
+							}
 						}
-					}
-					die = true
-					break
-				} else if voiceTimer == 7 {
-					transcribedText = transcription2
-					if debugLogging == true {
-						if disableLiveTranscription == false {
-							fmt.Printf("\n")
-						} else {
-							fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
+							transcribedText = transcription1
+							if debugLogging == true {
+								if disableLiveTranscription == false {
+									fmt.Printf("\n")
+								} else {
+									fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+								}
+							}
+							die = true
+							break
+						} else if voiceTimer == 7 {
+							transcribedText = transcription2
+							if debugLogging == true {
+								if disableLiveTranscription == false {
+									fmt.Printf("\n")
+								} else {
+									fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+								}
+							}
+							die = true
+							break
 						}
+						time.Sleep(time.Millisecond * 200)
+						processTwoData := micDataLeopard
+						transcription2Raw, err := leopardSTT.Process(processTwoData)
+						if err != nil {
+							log.Println(err)
+						}
+						transcription2 = strings.ToLower(transcription2Raw)
+						if debugLogging == true {
+							if disableLiveTranscription == false {
+								fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription2)
+							}
+						}
+						if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
+							transcribedText = transcription1
+							if debugLogging == true {
+								if disableLiveTranscription == false {
+									fmt.Printf("\n")
+								} else {
+									fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+								}
+							}
+							die = true
+							break
+						} else if voiceTimer == 7 {
+							transcribedText = transcription2
+							if debugLogging == true {
+								if disableLiveTranscription == false {
+									fmt.Printf("\n")
+								} else {
+									fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+								}
+							}
+							die = true
+							break
+						}
+						time.Sleep(time.Millisecond * 200)
 					}
-					die = true
-					break
 				}
-				time.Sleep(time.Millisecond * 200)
 			}
 		}
 	}()
@@ -208,10 +230,69 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 			break
 		}
 		data = append(data, chunk.InputAudio...)
-		micData = bytesToInt(stream, data, die, isOpus)
+		// returns []int16, framesize unknown
+		micDataLeopard = bytesToIntLeopard(stream, data, die, isOpus)
+		if picovoiceModeOS == "OnlyRhino" || picovoiceModeOS == "LeopardAndRhino" {
+			// returns [][]int16, 512 framesize
+			micDataRhino = bytesToIntRhino(stream, data, die, isOpus)
+			numInRange = 0
+			for _, sample := range micDataRhino {
+				if rhinoDone == false {
+					if numInRange >= oldDataLength {
+						isFinalized, err := rhinoSTI.Process(sample)
+						if isFinalized {
+							inference, err := rhinoSTI.GetInference()
+							if err != nil {
+								fmt.Println("Error getting inference: " + err.Error())
+							}
+							if inference.IsUnderstood {
+								transcribedIntent = inference.Intent
+								transcribedSlots = inference.Slots
+								die = true
+								leopardFallback = false
+								rhinoDone = true
+								successMatched = true
+								break
+							} else {
+								leopardFallback = true
+								rhinoDone = true
+								successMatched = false
+								if picovoiceModeOS == "OnlyRhino" {
+									die = true
+								} else {
+									fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + ": " + "Rhino STI failed, falling back to Leopard STT")
+								}
+								break
+							}
+						}
+						if err != nil {
+							fmt.Println("Error: " + err.Error())
+							break
+						}
+						numInRange = numInRange + 1
+					} else {
+						numInRange = numInRange + 1
+					}
+				}
+			}
+			oldDataLength = len(micDataRhino)
+			if die == true {
+				break
+			}
+		}
 	}
-	successMatched := processTextAll(req, transcribedText, matchListList, intentsList, isOpus, justThisBotNum)
-	if successMatched == 0 {
+	if picovoiceModeOS == "OnlyLeopard" || picovoiceModeOS == "LeopardAndRhino" {
+		if leopardFallback == true {
+			successMatched = processTextAll(req, transcribedText, matchListList, intentsList, isOpus, justThisBotNum)
+		} else {
+			paramCheckerSlots(req, transcribedIntent, transcribedSlots, isOpus, justThisBotNum)
+		}
+	} else if picovoiceModeOS == "OnlyRhino" {
+		if successMatched == true {
+			paramCheckerSlots(req, transcribedIntent, transcribedSlots, isOpus, justThisBotNum)
+		}
+	}
+	if successMatched == false {
 		if debugLogging == true {
 			fmt.Println("No intent was matched.")
 		}

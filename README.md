@@ -2,7 +2,7 @@
 
 This repo contains a custom Vector escape pod made from [chipper](https://github.com/digital-dream-labs/chipper) and [vector-cloud](https://github.com/digital-dream-labs/vector-cloud).
 
-This repo is a copy of [wire-pod](https://github.com/kercre123/wire-pod) but instead of using Coqui STT, it uses Picovoice Leopard. Leopard is faster, more accurate, and supports more hardware than Coqui, but it is not a totally local solution (processing is done locally, but it uploads usage to a server). The Coqui STT version will still be developed alongside this.
+This repo is a copy of [wire-pod](https://github.com/kercre123/wire-pod) but instead of using Coqui STT, it uses Picovoice. Picovoice's services are faster, more accurate, and supports more hardware than Coqui, but it is not a totally local solution (processing is done locally, but it uploads usage to a server). The Coqui STT version will still be developed alongside this.
 
 ## Program descriptions
 
@@ -141,6 +141,42 @@ sed -i "s/chipper-dev.api.anki.com:443/<domain>:<port>/g" vic-cloud
 systemctl start vic-cloud
 ```
 
+## Picovoice environment variables
+
+There are many environment variables exported in `./chipper/source.sh`. Here are ones that are not included in that file but can be added.
+
+### PICOVOICE_INSTANCES
+
+- Integer, default is 5. 
+- This is how many instances of Picovoice Leopard (or Rhino if you have selected that) get initiated. This is equal to how many bots can be streaming at once to chipper. If the number of bots streaming exceeds this number, it will send `intent_system_noaudio`.
+
+### PICOVOICE_MODE
+
+- String, default is `OnlyLeopard`.
+
+Possible options:
+- `OnlyLeopard`
+	- Default
+	- Transcribes the voice stream to text and processes that text with a list of matches
+- `OnlyRhino`
+	- Uses Picovoice Rhino to transcribe the voice stream directly into an intent
+	- This is much more accurate than Leopard, but there is a constant list of utterances for each intent which means the following commands don't work:
+		- "My name is <name>"
+		- "I have a question, <question>"
+		- "What's the weather in <location>"
+	- However, every other command works including:
+		- "Set a timer for <time> <units>"
+		- "Set your eye color to <color>"
+		- "Set your volume to <volume>
+	- With those last three commands there is a known list of possible utterances that can be easily made, but the first three require true speech-to-text to properly parse out what they need for the command to be sent correctly
+	- This repo comes included with a completed .rhn file for both amd64 and arm
+- `LeopardAndRhino`
+	- Uses Picovoice Rhino to transcribe the voice stream directly into an intent, but if it fails, it falls back to Leopard.
+	- Every command works and is very accurate. The hope is for this to become the default at some point.
+- `OlderPi`
+	- Same as `OnlyRhino` and sets `PICOVOICE_INSTANCES` to 1
+	- This is meant for less powerful Raspberry Pis like the 3B+ and the Pi Zero 2 W
+
 ## Status
 
 OS Support:
@@ -176,9 +212,9 @@ General notes:
 - If you get this error when running chipper, you are using a port that is being taken up by a program already: `panic: runtime error: invalid memory address or nil pointer dereference`
 	- Run `./setup.sh` with the 5th and 6th option to change the port, you will need to push files to the bot again.
 - If you want to disable logging from the voice processor, edit `./chipper/source.sh` and change `DEBUG_LOGGING` to `false`
-- There is support for 5 robots at a time
+- There is support for 5 robots at a time (can be increased or decreased with the `PICOVOICE_INSTANCES` variable in `./chipper/source.sh`)
 
-Current implemented actions:
+Current implemented actions (complete!):
 
 - Good robot
 - Bad robot

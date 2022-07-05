@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/Picovoice/leopard/binding/go v1.0.3 // indirect
+	github.com/Picovoice/rhino/binding/go/v2 v2.1.5 // indirect
 	github.com/asticode/go-asticoqui v0.1.0 // indirect
 	github.com/digital-dream-labs/api v0.0.0-20201230194801-ee4f8f160098
 	github.com/digital-dream-labs/hugh v0.0.0-20210210154335-f4159b9fcd5f

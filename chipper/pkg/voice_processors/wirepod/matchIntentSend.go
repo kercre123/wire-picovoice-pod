@@ -35,10 +35,10 @@ func IntentPass(req *vtt.IntentRequest, intentThing string, speechText string, i
 	return r, nil
 }
 
-func processTextAll(req *vtt.IntentRequest, voiceText string, listOfLists [][]string, intentList []string, isOpus bool, justThisBotNum int) int {
+func processTextAll(req *vtt.IntentRequest, voiceText string, listOfLists [][]string, intentList []string, isOpus bool, justThisBotNum int) bool {
 	var matched int = 0
 	var intentNum int = 0
-	var successMatched int = 0
+	var successMatched bool = false
 	for _, b := range listOfLists {
 		for _, c := range b {
 			if strings.Contains(voiceText, c) {
@@ -47,7 +47,7 @@ func processTextAll(req *vtt.IntentRequest, voiceText string, listOfLists [][]st
 				} else {
 					prehistoricParamChecker(req, intentList[intentNum], voiceText, justThisBotNum)
 				}
-				successMatched = 1
+				successMatched = true
 				matched = 1
 				break
 			}

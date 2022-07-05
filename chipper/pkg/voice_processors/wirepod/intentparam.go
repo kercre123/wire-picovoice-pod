@@ -4,10 +4,229 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
 )
+
+func paramCheckerSlots(req *vtt.IntentRequest, intent string, slots map[string]string, isOpus bool, justThisBotNum int) {
+	var intentParam string
+	var intentParamValue string
+	var newIntent string
+	var isParam bool
+	var intentParams map[string]string
+	var botLocation string = "San Francisco"
+	var botUnits string = "F"
+	var botPlaySpecific bool = false
+	var botIsEarlyOpus bool = false
+	if _, err := os.Stat("./botConfigs/" + req.Device + ".json"); err == nil {
+		if debugLogging == true {
+			fmt.Println("Found bot config file for " + req.Device)
+		}
+		botConfigByte, err := os.ReadFile("./botConfigs/" + req.Device + ".json")
+		if err != nil {
+			fmt.Println(err)
+		}
+		type botConfigJSON struct {
+			Location        string `json:"location"`
+			Units           string `json:"units"`
+			UsePlaySpecific bool   `json:"use_play_specific"`
+			IsEarlyOpus     bool   `json:"is_early_opus"`
+		}
+		var botConfJSON botConfigJSON
+		json.Unmarshal(botConfigByte, &botConfJSON)
+		botLocation = botConfJSON.Location
+		botUnits = botConfJSON.Units
+		botPlaySpecific = botConfJSON.UsePlaySpecific
+		botIsEarlyOpus = botConfJSON.IsEarlyOpus
+	}
+	if botPlaySpecific == true {
+		if strings.Contains(intent, "intent_play_blackjack") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "blackjack"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_fistbump") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "fist_bump"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_rollcube") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "roll_cube"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_popawheelie") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "pop_a_wheelie"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_pickupcube") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "pick_up_cube"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_keepaway") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "keep_away"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else {
+			newIntent = intent
+			intentParam = ""
+			intentParamValue = ""
+			isParam = false
+			intentParams = map[string]string{intentParam: intentParamValue}
+		}
+	}
+	if strings.Contains(intent, "volume") {
+		if slots["volume"] != "" {
+			newIntent = "intent_imperative_volumelevel_extend"
+			isParam = true
+			intentParam = "volume_level"
+			if strings.Contains(slots["volume"], "medium low") {
+				intentParamValue = "VOLUME_2"
+			} else if strings.Contains(slots["volume"], "low") {
+				intentParamValue = "VOLUME_1"
+			} else if strings.Contains(slots["volume"], "medium high") {
+				intentParamValue = "VOLUME_4"
+			} else if strings.Contains(slots["volume"], "high") {
+				intentParamValue = "VOLUME_5"
+			} else if strings.Contains(slots["volume"], "medium") {
+				intentParamValue = "VOLUME_3"
+			} else {
+				intentParamValue = "VOLUME_1"
+			}
+		} else {
+			isParam = false
+			intentParam = ""
+			intentParamValue = ""
+		}
+		intentParams = map[string]string{intentParam: intentParamValue}
+	} else if strings.Contains(intent, "eyecolor") {
+		isParam = true
+		newIntent = "intent_imperative_eyecolor_specific_extend"
+		intentParam = "eye_color"
+		if strings.Contains(slots["eye_color"], "purple") {
+			intentParamValue = "COLOR_PURPLE"
+		} else if strings.Contains(slots["eye_color"], "blue") || strings.Contains(slots["eye_color"], "sapphire") {
+			intentParamValue = "COLOR_BLUE"
+		} else if strings.Contains(slots["eye_color"], "yellow") {
+			intentParamValue = "COLOR_YELLOW"
+		} else if strings.Contains(slots["eye_color"], "teal") || strings.Contains(slots["eye_color"], "tell") {
+			intentParamValue = "COLOR_TEAL"
+		} else if strings.Contains(slots["eye_color"], "green") {
+			intentParamValue = "COLOR_GREEN"
+		} else if strings.Contains(slots["eye_color"], "orange") {
+			intentParamValue = "COLOR_ORANGE"
+		} else {
+			newIntent = intent
+			intentParamValue = ""
+			isParam = false
+		}
+		intentParams = map[string]string{intentParam: intentParamValue}
+	} else if strings.Contains(intent, "_selfie") {
+		newIntent = "intent_photo_take_extend"
+		intentParam = "entity_photo_selfie"
+		intentParamValue = "photo_selfie"
+		isParam = true
+		intentParams = map[string]string{intentParam: intentParamValue}
+	} else if strings.Contains(intent, "_noselfie") {
+		newIntent = "intent_photo_take_extend"
+		intentParam = "entity_photo_selfie"
+		intentParamValue = ""
+		isParam = true
+		intentParams = map[string]string{intentParam: intentParamValue}
+	} else if strings.Contains(intent, "settimer") {
+		isParam = true
+		newIntent = intent
+		slotNum := slots["num"]
+		slotUnit := slots["unit"]
+		timerSecs, err := strconv.Atoi(slotNum)
+		if err != nil {
+			fmt.Println(err)
+		}
+		if slotNum != "" && slotUnit != "" {
+			if strings.Contains(slotUnit, "minute") {
+				timerSecs = timerSecs * 60
+			} else if strings.Contains(slotUnit, "hour") {
+				timerSecs = timerSecs * 60 * 60
+			}
+		}
+		if debugLogging == true {
+			fmt.Println("Seconds parsed from speech: " + strconv.Itoa(timerSecs))
+		}
+		intentParam = "timer_duration"
+		intentParamValue = strconv.Itoa(timerSecs)
+		intentParams = map[string]string{intentParam: intentParamValue}
+	} else if strings.Contains(intent, "global_stop_extend") {
+		isParam = true
+		newIntent = intent
+		intentParam = "what_to_stop"
+		intentParamValue = "timer"
+		intentParams = map[string]string{intentParam: intentParamValue}
+	} else if strings.Contains(intent, "intent_knowledgegraph_prompt") {
+		isParam = false
+		newIntent = "intent_knowledge_promptquestion"
+		intentParam = ""
+		intentParamValue = ""
+		intentParams = map[string]string{intentParam: intentParamValue}
+	} else if strings.Contains(intent, "intent_weather_extend") {
+		isParam = true
+		newIntent = intent
+		condition, is_forecast, local_datetime, speakable_location_string, temperature, temperature_unit := weatherParser("no", botLocation, botUnits)
+		intentParams = map[string]string{"condition": condition, "is_forecast": is_forecast, "local_datetime": local_datetime, "speakable_location_string": speakable_location_string, "temperature": temperature, "temperature_unit": temperature_unit}
+	} else {
+		if intentParam == "" {
+			newIntent = intent
+			intentParam = ""
+			intentParamValue = ""
+			isParam = false
+			intentParams = map[string]string{intentParam: intentParamValue}
+		}
+	}
+	if isOpus == false || botIsEarlyOpus == true || botPlaySpecific == true {
+		if strings.Contains(intent, "intent_play_blackjack") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "blackjack"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_fistbump") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "fist_bump"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_play_rollcube") {
+			isParam = true
+			newIntent = "intent_play_specific_extend"
+			intentParam = "entity_behavior"
+			intentParamValue = "roll_cube"
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_imperative_praise") {
+			isParam = false
+			newIntent = "intent_imperative_affirmative"
+			intentParam = ""
+			intentParamValue = ""
+			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_imperative_abuse") {
+			isParam = false
+			newIntent = "intent_imperative_negative"
+			intentParam = ""
+			intentParamValue = ""
+			intentParams = map[string]string{intentParam: intentParamValue}
+		}
+	}
+	IntentPass(req, newIntent, intent, intentParams, isParam, justThisBotNum)
+}
 
 func paramChecker(req *vtt.IntentRequest, intent string, speechText string, justThisBotNum int) {
 	var intentParam string

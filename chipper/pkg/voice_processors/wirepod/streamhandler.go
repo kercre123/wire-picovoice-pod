@@ -68,7 +68,7 @@ func bytesToSamples(buf []byte) []int16 {
 	return samples
 }
 
-func bytesToInt(stream opus.OggStream, data []byte, die bool, isOpus bool) []int16 {
+func bytesToIntLeopard(stream opus.OggStream, data []byte, die bool, isOpus bool) []int16 {
 	// detect if data is pcm or opus
 	if die == true {
 		return nil
@@ -83,6 +83,37 @@ func bytesToInt(stream opus.OggStream, data []byte, die bool, isOpus bool) []int
 	} else {
 		// pcm
 		return bytesToSamples(data)
+	}
+	return nil
+}
+
+func bytesToIntRhino(stream opus.OggStream, data []byte, die bool, isOpus bool) [][]int16 {
+	// detect if data is pcm or opus
+	if die == true {
+		return nil
+	}
+	if isOpus == true {
+		// opus
+		n, err := stream.Decode(data)
+		if err != nil {
+			fmt.Println(err)
+		}
+		nint := bytesToSamples(n)
+		// divide nint into chunks of 512 samples
+		chunks := make([][]int16, len(nint)/512)
+		for i := 0; i < len(nint)/512; i++ {
+			chunks[i] = nint[i*512 : (i+1)*512]
+		}
+		return chunks
+	} else {
+		// pcm
+		nint := bytesToSamples(data)
+		// divide nint into chunks of 512 samples
+		chunks := make([][]int16, len(nint)/512)
+		for i := 0; i < len(nint)/512; i++ {
+			chunks[i] = nint[i*512 : (i+1)*512]
+		}
+		return chunks
 	}
 	return nil
 }

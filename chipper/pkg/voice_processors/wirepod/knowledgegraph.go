@@ -141,7 +141,26 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 		}, nil
 		return nil, nil
 	} else {
-		leopardSTT = leopardSTTArray[botNum-1]
+		if picovoiceModeOS == "OnlyLeopard" || picovoiceModeOS == "LeopardAndRhino" {
+			leopardSTT = leopardSTTArray[botNum-1]
+		} else {
+			fmt.Println("Q&A is not enabled due to OnlyRhino mode.")
+			kg := pb.KnowledgeGraphResponse{
+				Session:     req.Session,
+				DeviceId:    req.Device,
+				CommandType: NoResult,
+				SpokenText:  "Q and A is not available due to the Only Rhino environment variable.",
+			}
+			botNumKG = botNumKG - 1
+			botNum = botNum - 1
+			if err := req.Stream.Send(&kg); err != nil {
+				return nil, err
+			}
+			return &vtt.KnowledgeGraphResponse{
+				Intent: &kg,
+			}, nil
+			return nil, nil
+		}
 	}
 	if debugLogging == true {
 		fmt.Println("(KG) Bot " + strconv.Itoa(botNumKG) + " ESN: " + req.Device)
@@ -271,7 +290,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 		}
 
 		data = append(data, chunk.InputAudio...)
-		micData = bytesToInt(stream, data, die, isOpus)
+		micData = bytesToIntLeopard(stream, data, die, isOpus)
 		if die == true {
 			break
 		}

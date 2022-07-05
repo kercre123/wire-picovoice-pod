@@ -44,6 +44,8 @@ github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5/go.mod h1:lmUJ/7eu/Q8
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/Picovoice/leopard/binding/go v1.0.3 h1:K7zelpUBZP/vivHmpjLLGGsH93cbUO6q80N78Q8fBHU=
 github.com/Picovoice/leopard/binding/go v1.0.3/go.mod h1:5kaEg9ZcH2dLkrX/H1xMVF6QFM7l3vd9GKxeXSanA8s=
+github.com/Picovoice/rhino/binding/go/v2 v2.1.5 h1:53UUkg7EcKPoKBb8ZWxxJQwfmaiN/S9dO4RhyPgQZ9s=
+github.com/Picovoice/rhino/binding/go/v2 v2.1.5/go.mod h1:/DNCpNLIENfz9A85bHUUDTW8YSHFcmPDDDA/XZPQgbI=
 github.com/aalpern/go-metrics v0.0.0-20181116155206-644932c99203/go.mod h1:wHUOZ2LlAirciaWYGZM3apvZftM7aRXhLMDsdjqEFB4=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc h1:cAKDfWh5VpdgMhJosfJnn5/FoN2SRZ4p7fJNX58YPaU=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
