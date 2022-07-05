@@ -62,7 +62,11 @@ func InitPicovoice() {
 		fmt.Println("Initializing Picovoice Instance " + strconv.Itoa(i))
 		if picovoiceModeOS == "OnlyLeopard" || picovoiceModeOS == "LeopardAndRhino" {
 			leopardSTTArray = append(leopardSTTArray, leopard.Leopard{AccessKey: picovoiceKey})
-			leopardSTTArray[i].Init()
+			if i == picovoiceInstances-1 {
+				leopardSTTArray[i].Init()
+			} else {
+				go leopardSTTArray[i].Init()
+			}
 		}
 		if picovoiceModeOS == "OnlyRhino" {
 			if strings.Contains(os.Getenv("GOARCH"), "arm") && strings.Contains(os.Getenv("GOOS"), "linux") {
@@ -72,7 +76,11 @@ func InitPicovoice() {
 			} else {
 				rhinoSTIArray = append(rhinoSTIArray, rhino.Rhino{AccessKey: picovoiceKey, ContextPath: "./rhn/amd64intents.rhn", Sensitivity: rhinoSensitivity, EndpointDurationSec: rhinoEndpointDurationSec})
 			}
-			rhinoSTIArray[i].Init()
+			if i == picovoiceInstances-1 {
+				rhinoSTIArray[i].Init()
+			} else {
+				go rhinoSTIArray[i].Init()
+			}
 		}
 		if picovoiceModeOS == "LeopardAndRhino" {
 			if strings.Contains(os.Getenv("GOARCH"), "arm") && strings.Contains(os.Getenv("GOOS"), "linux") {
@@ -82,7 +90,12 @@ func InitPicovoice() {
 			} else {
 				rhinoSTIArray = append(rhinoSTIArray, rhino.Rhino{AccessKey: picovoiceKey, ContextPath: "./rhn/amd64intentsnoweather.rhn", Sensitivity: rhinoSensitivity, EndpointDurationSec: rhinoEndpointDurationSec})
 			}
-			rhinoSTIArray[i].Init()
+			if i == picovoiceInstances-1 {
+				rhinoSTIArray[i].Init()
+			} else {
+				go rhinoSTIArray[i].Init()
+			}
 		}
 	}
+	fmt.Println("Picovoice Initialized!")
 }
