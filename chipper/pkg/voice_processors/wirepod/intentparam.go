@@ -172,6 +172,12 @@ func paramCheckerSlots(req *vtt.IntentRequest, intent string, slots map[string]s
 			intentParam = ""
 			intentParamValue = ""
 			intentParams = map[string]string{intentParam: intentParamValue}
+		} else if strings.Contains(intent, "intent_imperative_love") {
+			isParam = false
+			newIntent = "intent_greeting_hello"
+			intentParam = ""
+			intentParamValue = ""
+			intentParams = map[string]string{intentParam: intentParamValue}
 		} else if strings.Contains(intent, "intent_imperative_abuse") {
 			isParam = false
 			newIntent = "intent_imperative_negative"
