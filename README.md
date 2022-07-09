@@ -172,12 +172,12 @@ Possible options:
 	- This repo comes included with a completed .rhn file for both amd64 and arm
 - `LeopardAndRhino`
 	- Uses Picovoice Rhino to transcribe the voice stream directly into an intent, and if it fails, it falls back to Leopard.
-	- This used to be the default and is recommended if you are having issues with `OnlyCheetah`.
+	- This used to be the default and is recommended if you are having issues with `OnlyCheetah`, or if you don't plan to setup custom intents and are fine with higher accuracy at the cost of loosing speech to text.
 - `OlderPi`
 	- Same as `OnlyRhino` and sets `PICOVOICE_INSTANCES` to 1
 	- This is meant for less powerful Raspberry Pis like the 3B+ and the Pi Zero 2 W
 - `OnlyCheetah`
-	- Cheetah supports a mic stream while Leopard doesn't. Leopard has to transcribe all of the PCM data, which means it has to be transcribed up to 20 times per voice request for snappy end-of-speech detection.
+	- Cheetah supports a mic stream while Leopard doesn't. Leopard has to transcribe all of the PCM data, which means it has to be transcribed up to 20 times per voice request for snappy end-of-speech detection. This is a little wasteful and uses up more seconds of allowed speech (Picovoice's free teir has 360000 seconds per 30 days). With Cheetah, I can just pipe the audio directly into it and it gives transcriptions. In my experience it is also as accurate and as fast as Leopard.
 
 ## Status
 
