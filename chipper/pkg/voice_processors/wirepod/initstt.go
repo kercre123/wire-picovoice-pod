@@ -6,12 +6,14 @@ import (
 	"strconv"
 	"strings"
 
+	cheetah "github.com/Picovoice/cheetah/binding/go"
 	leopard "github.com/Picovoice/leopard/binding/go"
 	rhino "github.com/Picovoice/rhino/binding/go/v2"
 )
 
 var leopardSTTArray []leopard.Leopard
 var rhinoSTIArray []rhino.Rhino
+var cheetahSTTArray []cheetah.Cheetah
 var picovoiceInstancesOS string = os.Getenv("PICOVOICE_INSTANCES")
 var picovoiceModeOS string = os.Getenv("PICOVOICE_MODE")
 var picovoiceInstances int
@@ -31,7 +33,6 @@ func InitPicovoice() {
 			fmt.Println("PICOVOICE_INSTANCES is not a valid integer, using default value of 3")
 			picovoiceInstances = 3
 		}
-		fmt.Println("Initializing " + strconv.Itoa(picovoiceInstances) + " Picovoice Instances...")
 	}
 	if picovoiceKeyOS == "" {
 		if leopardKeyOS == "" {
@@ -45,11 +46,11 @@ func InitPicovoice() {
 		picovoiceKey = picovoiceKeyOS
 	}
 	if picovoiceModeOS == "" {
-		picovoiceModeOS = "LeopardAndRhino"
+		picovoiceModeOS = "OnlyCheetah"
 	} else {
-		if picovoiceModeOS != "OnlyLeopard" && picovoiceModeOS != "OnlyRhino" && picovoiceModeOS != "LeopardAndRhino" && picovoiceModeOS != "OlderPi" {
+		if picovoiceModeOS != "OnlyLeopard" && picovoiceModeOS != "OnlyRhino" && picovoiceModeOS != "LeopardAndRhino" && picovoiceModeOS != "OlderPi" && picovoiceModeOS != "OnlyCheetah" {
 			fmt.Println("PICOVOICE_MODE is not set to a valid value, using default value of OnlyLeopard")
-			picovoiceModeOS = "OnlyLeopard"
+			picovoiceModeOS = "OnlyCheetah"
 		}
 	}
 	if picovoiceModeOS == "OlderPi" {
@@ -63,6 +64,10 @@ func InitPicovoice() {
 		if picovoiceModeOS == "OnlyLeopard" || picovoiceModeOS == "LeopardAndRhino" {
 			leopardSTTArray = append(leopardSTTArray, leopard.Leopard{AccessKey: picovoiceKey})
 			leopardSTTArray[i].Init()
+		}
+		if picovoiceModeOS == "OnlyCheetah" {
+			cheetahSTTArray = append(cheetahSTTArray, cheetah.Cheetah{AccessKey: picovoiceKey, EndpointDuration: 0.3})
+			cheetahSTTArray[i].Init()
 		}
 		if picovoiceModeOS == "OnlyRhino" {
 			if strings.Contains(os.Getenv("GOARCH"), "arm") && strings.Contains(os.Getenv("GOOS"), "linux") {

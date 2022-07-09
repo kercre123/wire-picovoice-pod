@@ -42,6 +42,8 @@ github.com/Microsoft/go-winio v0.4.15-0.20200113171025-3fe6c5262873/go.mod h1:tT
 github.com/Microsoft/hcsshim v0.8.9/go.mod h1:5692vkUqntj1idxauYlpoINNKeqCiG6Sg38RRsjT5y8=
 github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5/go.mod h1:lmUJ/7eu/Q8D7ML55dXQrVaamCz2vxCfdQBasLZfHKk=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
+github.com/Picovoice/cheetah/binding/go v1.0.3 h1:RCQ93kr1eSCTPNEtN8mBng/pzBtHg5P47THtrYHbcFM=
+github.com/Picovoice/cheetah/binding/go v1.0.3/go.mod h1:+7UFRMp3uyXYt/wZ0bFCqifjue7p4O7A0+LP09FWN+o=
 github.com/Picovoice/leopard/binding/go v1.0.3 h1:K7zelpUBZP/vivHmpjLLGGsH93cbUO6q80N78Q8fBHU=
 github.com/Picovoice/leopard/binding/go v1.0.3/go.mod h1:5kaEg9ZcH2dLkrX/H1xMVF6QFM7l3vd9GKxeXSanA8s=
 github.com/Picovoice/rhino/binding/go/v2 v2.1.5 h1:53UUkg7EcKPoKBb8ZWxxJQwfmaiN/S9dO4RhyPgQZ9s=

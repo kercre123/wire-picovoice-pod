@@ -3,6 +3,7 @@ module github.com/digital-dream-labs/chipper
 go 1.15
 
 require (
+	github.com/Picovoice/cheetah/binding/go v1.0.3 // indirect
 	github.com/Picovoice/leopard/binding/go v1.0.3 // indirect
 	github.com/Picovoice/rhino/binding/go/v2 v2.1.5 // indirect
 	github.com/asticode/go-asticoqui v0.1.0 // indirect

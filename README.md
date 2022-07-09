@@ -152,49 +152,53 @@ There are many environment variables exported in `./chipper/source.sh`. Here are
 
 ### PICOVOICE_MODE
 
-- String, default is `LeopardAndRhino`.
+- String, default is `OnlyCheetah`.
 
 Possible options:
 - `OnlyLeopard`
 	- Transcribes the voice stream to text and processes that text with a list of utterance matches
 - `OnlyRhino`
 	- Uses Picovoice Rhino to transcribe the voice stream directly into an intent
-	- This is much more accurate than Leopard, but there is a constant list of utterances for each intent which means the following commands don't work:
-		- "My name is <name>"
-		- "I have a question, <question>"
-		- "What's the weather in <location>"
+	- This is much more accurate than Leopard and Cheetah, but there is a constant list of utterances for each intent which means the following commands don't work because they have a broad argument:
+		- "My name is `name`"
+		- "I have a question, `question`"
+		- "What's the weather in `location`"
+		- "Record/play a message for `name`"
 	- However, every other command works including:
-		- "Set a timer for <time> <units>"
-		- "Set your eye color to <color>"
-		- "Set your volume to <volume>
+		- "Set a timer for `time` `units`"
+		- "Set your eye color to `color`"
+		- "Set your volume to `volume`"
 	- With those last three commands there is a known list of possible utterances that can be easily made, but the first three require true speech-to-text to properly parse out what they need for the command to be sent correctly
 	- This repo comes included with a completed .rhn file for both amd64 and arm
 - `LeopardAndRhino`
 	- Uses Picovoice Rhino to transcribe the voice stream directly into an intent, and if it fails, it falls back to Leopard.
-	- Every command works and is very accurate and fast.
+	- This used to be the default and is recommended if you are having issues with `OnlyCheetah`.
 - `OlderPi`
 	- Same as `OnlyRhino` and sets `PICOVOICE_INSTANCES` to 1
 	- This is meant for less powerful Raspberry Pis like the 3B+ and the Pi Zero 2 W
+- `OnlyCheetah`
+	- Cheetah supports a mic stream while Leopard doesn't. Leopard has to transcribe all of the PCM data, which means it has to be transcribed up to 20 times per voice request for snappy end-of-speech detection.
 
 ## Status
 
-OS Support:
+### OS Support
 
 - Arch
 - Debian/Ubuntu/other APT distros
 - Windows 10/11 (WSL only)
 - macOS 10.15 or above
 
-Architecture Support:
+### Architecture Support
 
 - amd64/x86_64
 - arm64/aarch64
+- arm32/armv7l (kinda)
 
 Things wire-picovoice-pod has worked on:
 
 - Raspberry Pi 4B+ 4GB RAM with Raspberry Pi OS
 	- Recommended platform, very fast
-	- 64-bit only (I think)
+	- 32-bit support on Pi 4 works, but doesn't on Pi 3
 - Raspberry Pi 4B+ 4GB RAM with Manjaro 22.04
 - Nintendo Switch with L4T Ubuntu
 - Desktop with Ryzen 5 3600, 16 GB RAM with Ubuntu 22.04
@@ -202,23 +206,29 @@ Things wire-picovoice-pod has worked on:
 - Late 2009 iMac with Core 2 Duo
 - Android Devices
 	- Pixel 4, Note 4, Razer Phone, Oculus Quest 2, OnePlus 7 Pro, Moto G6, Pixel 2
-	- If you run into an error when trying to execute start.sh, please open an issue. This is a Picovoice Leopard issue and can be solved by editing the leopard module.
+	- If you run into an error when trying to execute start.sh, please open an issue. This is a Picovoice issue and can be solved by editing the go modules.
 	- [Termux](https://github.com/termux/termux-app) proot-distro: Use Ubuntu, make sure to use a port above 1024 and not the default 443.
 	- Linux Deploy: Works stock, just make sure to choose the arch that matches your device in settings. Also use a bigger image size, at least 3 GB.
 
-General notes:
+### General notes
 
 - If you get this error when running chipper, you are using a port that is being taken up by a program already: `panic: runtime error: invalid memory address or nil pointer dereference`
 	- Run `./setup.sh` with the 5th and 6th option to change the port, you will need to push files to the bot again.
 - If you want to disable logging from the voice processor, edit `./chipper/source.sh` and change `DEBUG_LOGGING` to `false`
-- There is support for 5 robots at a time (can be increased or decreased with the `PICOVOICE_INSTANCES` variable in `./chipper/source.sh`)
+- There is support for 3 robots at a time (can be increased or decreased with the `PICOVOICE_INSTANCES` variable in `./chipper/source.sh`)
 
-Current implemented actions (complete!):
+### TODO
+
+- Implement a VAD system in conjunction with Leopard
+- Create a way (either webserver or script) to configure specific bots and env vars easily
+- Implement custom intents, which maybe launches python scripts
+
+### Current implemented actions (complete!)
 
 - Good robot
 - Bad robot
 - Change your eye color
-- Change your eye color to <color>
+- Change your eye color to {color}
 	- blue, purple, teal, green, yellow
 - How old are you
 - Start exploring ("deploring" works better)
@@ -250,7 +260,7 @@ Current implemented actions (complete!):
 	- Requires API setup
 	- weatherapi.com is implemented, use the 5th option in `./setup.sh` to set it up
 	- To set a default location, use the `botSetup.sh` script in the `./chipper` directory
-- What's the weather in <location>
+- What's the weather in {location}
 	- Requires API setup
 	- weatherapi.com is implemented, use the 5th option in `./setup.sh` to set it up
 - Im sorry
@@ -260,15 +270,15 @@ Current implemented actions (complete!):
 - Be quiet
 - Volume up
 - Look at me
-- Set the volume to <volume>
+- Set the volume to {volume}
 	- High, medium high, medium, medium low, low
 - Shut up
-- My name is <name>
+- My name is {name}
 - I have a question
 	- Requires API setup
 	- Houndify is implemented, use the 5th option in `./setup.sh` to set it up
-- Set a timer for <time> seconds
-- Set a timer for <time> minutes
+- Set a timer for {time} seconds
+- Set a timer for {time} minutes
 - Check the timer
 - Stop the timer
 - Dance
@@ -276,9 +286,9 @@ Current implemented actions (complete!):
 - Fetch the cube
 - Find the cube
 - Do a trick
-- Record a message for <name>
+- Record a message for {name}
 	- Enable `Messaging` feature in Vector's webViz Features tab
-- Play a message for <name>
+- Play a message for {name}
 	- Enable `Messaging` feature in Vector's webViz Features tab
 - Play keepaway
 	- This may only be a feature in 1.5 and lower

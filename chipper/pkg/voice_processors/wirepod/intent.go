@@ -1,6 +1,7 @@
 package wirepod
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
 
+	cheetah "github.com/Picovoice/cheetah/binding/go"
 	leopard "github.com/Picovoice/leopard/binding/go"
 	rhino "github.com/Picovoice/rhino/binding/go/v2"
 	opus "github.com/digital-dream-labs/opus-go/opus"
@@ -34,6 +36,14 @@ func check(e error) {
 		- current workaround: setup specific bots with botSetup.sh
 */
 
+func samplesToBytes(buf []int16) []byte {
+	output := make([]byte, len(buf)*2)
+	for i := 0; i < len(buf); i++ {
+		binary.LittleEndian.PutUint16(output[2*i:2*(i+1)], uint16(buf[i]))
+	}
+	return output
+}
+
 func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, error) {
 	var voiceTimer int = 0
 	var transcription1 string = ""
@@ -47,6 +57,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 	var sayStarting = true
 	var leopardSTT leopard.Leopard
 	var rhinoSTI rhino.Rhino
+	var cheetahSTT cheetah.Cheetah
 	var leopardFallback bool = false
 	var numInRange int = 0
 	var oldDataLength int = 0
@@ -95,6 +106,9 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		if picovoiceModeOS == "OnlyRhino" || picovoiceModeOS == "LeopardAndRhino" {
 			rhinoSTI = rhinoSTIArray[botNum-1]
 		}
+		if picovoiceModeOS == "OnlyCheetah" {
+			cheetahSTT = cheetahSTTArray[botNum-1]
+		}
 	}
 	if debugLogging == true {
 		fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " ESN: " + req.Device)
@@ -116,6 +130,11 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 				fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Stream Type: PCM")
 			}
 		}
+	}
+	pcmFile, err := os.Create("/home/kerigan/Desktop/pcm_" + strconv.Itoa(justThisBotNum) + ".pcm")
+	if err != nil {
+		fmt.Println("Error creating pcm file")
+		fmt.Println(err)
 	}
 	stream := opus.OggStream{}
 	go func() {
@@ -239,6 +258,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 			for _, sample := range micDataRhino {
 				if rhinoDone == false {
 					if numInRange >= oldDataLength {
+						pcmFile.Write(samplesToBytes(sample))
 						isFinalized, err := rhinoSTI.Process(sample)
 						if isFinalized {
 							inference, err := rhinoSTI.GetInference()
@@ -280,6 +300,56 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 				break
 			}
 		}
+		if picovoiceModeOS == "OnlyCheetah" {
+			// returns [][]int16, 512 framesize
+			micDataRhino = bytesToIntRhino(stream, data, die, isOpus)
+			numInRange = 0
+			for _, sample := range micDataRhino {
+				if numInRange >= oldDataLength {
+					if sayStarting == true {
+						if debugLogging == true {
+							fmt.Printf("Transcribing stream %d...\n", justThisBotNum)
+						}
+						sayStarting = false
+					}
+					partialTranscript, isEndpoint, err := cheetahSTT.Process(sample)
+					if partialTranscript != "" {
+						transcribedText = strings.ToLower(transcribedText + strings.TrimSpace(partialTranscript) + " ")
+						if debugLogging == true && disableLiveTranscription == false {
+							fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
+						}
+					}
+					if isEndpoint {
+						finalTranscript, err := cheetahSTT.Flush()
+						transcribedText = strings.TrimSpace(strings.ToLower(transcribedText + finalTranscript))
+						if debugLogging == true {
+							if disableLiveTranscription == false {
+								fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Final Transcription: " + transcribedText + "\n")
+							} else {
+								fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Final Transcription: " + transcribedText)
+							}
+						}
+						successMatched = false
+						die = true
+						break
+						if err != nil {
+							fmt.Println("Error: " + err.Error())
+						}
+					}
+					if err != nil {
+						fmt.Println("Error: " + err.Error())
+						break
+					}
+					numInRange = numInRange + 1
+				} else {
+					numInRange = numInRange + 1
+				}
+			}
+			oldDataLength = len(micDataRhino)
+			if die == true {
+				break
+			}
+		}
 	}
 	if picovoiceModeOS == "OnlyLeopard" || picovoiceModeOS == "LeopardAndRhino" {
 		if leopardFallback == true {
@@ -291,6 +361,8 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		if successMatched == true {
 			paramCheckerSlots(req, transcribedIntent, transcribedSlots, isOpus, justThisBotNum)
 		}
+	} else if picovoiceModeOS == "OnlyCheetah" {
+		successMatched = processTextAll(req, transcribedText, matchListList, intentsList, isOpus, justThisBotNum)
 	}
 	if successMatched == false {
 		if debugLogging == true {
@@ -299,5 +371,8 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		IntentPass(req, "intent_system_noaudio", transcribedText, map[string]string{"": ""}, false, justThisBotNum)
 	}
 	botNum = botNum - 1
+	if debugLogging == true {
+		fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " request served.")
+	}
 	return nil, nil
 }
