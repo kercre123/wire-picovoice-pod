@@ -11,6 +11,18 @@ import (
 	"github.com/digital-dream-labs/chipper/pkg/vtt"
 )
 
+type intentsStruct []struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Utterances  []string `json:"utterances"`
+	Intent      string   `json:"intent"`
+	Params      struct {
+		ParamName  string `json:"paramname"`
+		ParamValue string `json:"paramvalue"`
+	} `json:"params"`
+	Exec string `json:"exec"`
+}
+
 func IntentPass(req *vtt.IntentRequest, intentThing string, speechText string, intentParams map[string]string, isParam bool, justThisBotNum int) (*vtt.IntentResponse, error) {
 	intent := pb.IntentResponse{
 		IsFinal: true,
@@ -41,16 +53,6 @@ func customIntentHandler(req *vtt.IntentRequest, voiceText string, intentList []
 	var successMatched bool = false
 	if _, err := os.Stat("./customIntents.json"); err == nil {
 		fmt.Println("Found customIntents.json")
-		type intentsStruct []struct {
-			Name        string   `json:"name"`
-			Description string   `json:"description"`
-			Utterances  []string `json:"utterances"`
-			Intent      string   `json:"intent"`
-			Params      struct {
-				Test string `json:"test"`
-			} `json:"params"`
-			Exec string `json:"exec"`
-		}
 		var customIntentJSON intentsStruct
 		customIntentJSONFile, err := os.ReadFile("./customIntents.json")
 		json.Unmarshal(customIntentJSONFile, &customIntentJSON)

@@ -61,6 +61,7 @@ func startServer() {
 	p, err := wirepod.New()
 	wirepod.InitPicovoice()
 	wirepod.InitHoundify()
+	go wirepod.StartWebServer()
 	if err != nil {
 		log.Fatal(err)
 	}
