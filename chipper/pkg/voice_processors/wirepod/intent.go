@@ -131,11 +131,6 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 			}
 		}
 	}
-	pcmFile, err := os.Create("/home/kerigan/Desktop/pcm_" + strconv.Itoa(justThisBotNum) + ".pcm")
-	if err != nil {
-		fmt.Println("Error creating pcm file")
-		fmt.Println(err)
-	}
 	stream := opus.OggStream{}
 	go func() {
 		if isOpus == true {
@@ -258,7 +253,6 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 			for _, sample := range micDataRhino {
 				if rhinoDone == false {
 					if numInRange >= oldDataLength {
-						pcmFile.Write(samplesToBytes(sample))
 						isFinalized, err := rhinoSTI.Process(sample)
 						if isFinalized {
 							inference, err := rhinoSTI.GetInference()
