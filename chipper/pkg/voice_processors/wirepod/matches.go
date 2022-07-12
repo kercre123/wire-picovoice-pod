@@ -3,6 +3,7 @@ package wirepod
 // This is where you can add intents and more possible utterances for intents
 
 var meetVictorList = []string{"name is", "native is", "names", "name's"}
+var weatherList = []string{"weather", "whether", "the other", "the water"}
 var nameAskList = []string{"my name"}
 var eyeColorList = []string{"eye color", "colo", "i call her", "i foller", "icolor", "ecce", "erior", "ichor", "agricola",
 	"change", "oracular", "oracle"}
@@ -34,7 +35,6 @@ var negativeList = []string{"no", "dont"}
 var photoList = []string{"photo", "foto", "selby", "capture", "picture"}
 var praiseList = []string{"good", "awesome", "also", "as some", "of them", "battle", "t rob", "the ro", "amazing", "woodcourt"}
 var abuseList = []string{"bad", "that ro", "ad ro", "a root", "hate", "horrible"}
-var weatherList = []string{"weather", "whether", "the other", "the water"}
 var apologizeList = []string{"sorry", "apologize", "apologise", "the tory"}
 var backupList = []string{"back"}
 var volumeDownList = []string{"all you down", "volume down", "down volume", "down the volume", "quieter"}
@@ -65,14 +65,14 @@ var keepawayList = []string{"keepaway", "keep away"}
 
 // make sure intentsList perfectly matches up with matchListList
 
-var intentsList = []string{"intent_names_username_extend", "intent_names_ask", "intent_imperative_eyecolor",
+var intentsList = []string{"intent_names_username_extend", "intent_weather_extend", "intent_names_ask", "intent_imperative_eyecolor",
 	"intent_character_age", "intent_explore_start", "intent_system_charger", "intent_system_sleep",
 	"intent_greeting_goodmorning", "intent_greeting_goodnight", "intent_greeting_goodbye", "intent_seasonal_happynewyear",
 	"intent_seasonal_happyholidays", "intent_amazon_signin", "intent_amazon_signin", "intent_imperative_forward",
 	"intent_imperative_turnaround", "intent_imperative_turnleft", "intent_imperative_turnright", "intent_play_rollcube",
 	"intent_play_popawheelie", "intent_play_fistbump", "intent_play_blackjack", "intent_imperative_affirmative",
 	"intent_imperative_negative", "intent_photo_take_extend", "intent_imperative_praise", "intent_imperative_abuse",
-	"intent_weather_extend", "intent_imperative_apologize", "intent_imperative_backup", "intent_imperative_volumedown",
+	"intent_imperative_apologize", "intent_imperative_backup", "intent_imperative_volumedown",
 	"intent_imperative_volumeup", "intent_imperative_lookatme", "intent_imperative_volumelevel_extend",
 	"intent_imperative_shutup", "intent_greeting_hello", "intent_imperative_come", "intent_imperative_love",
 	"intent_knowledge_promptquestion", "intent_clock_checktimer", "intent_global_stop_extend", "intent_clock_settimer_extend",
@@ -80,11 +80,11 @@ var intentsList = []string{"intent_names_username_extend", "intent_names_ask", "
 	"intent_imperative_fetchcube", "intent_imperative_findcube", "intent_play_anytrick", "intent_message_recordmessage_extend",
 	"intent_message_playmessage_extend", "intent_blackjack_hit", "intent_blackjack_stand", "intent_play_keepaway"}
 
-var matchListList = [][]string{meetVictorList, nameAskList, eyeColorList, howOldList, exploreStartList,
+var matchListList = [][]string{meetVictorList, weatherList, nameAskList, eyeColorList, howOldList, exploreStartList,
 	chargerList, sleepList, morningList, nightList, byeList,
 	newYearList, holidaysList, signInAlexaList, signOutAlexaList, forwardList, turnAroundList, turnLeftList,
 	turnRightList, rollCubeList, wheelieList, fistbumpList, blackjackList, affirmativeList,
-	negativeList, photoList, praiseList, abuseList, weatherList, apologizeList,
+	negativeList, photoList, praiseList, abuseList, apologizeList,
 	backupList, volumeDownList, volumeUpList, lookAtMeList, volumeSpecificList,
 	shutUpList, helloList, comeList, loveList, questionList, checkTimerList, stopTimerList,
 	timerList, timeList, quietList, danceList, pickUpList, fetchCubeList, findCubeList, trickList,
