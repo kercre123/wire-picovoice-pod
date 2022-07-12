@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wire-Pod Interface</title>
+    <script src="./js/customIntents.js"></script>
+</head>
+<body>
+    <h1>Wire-Pod Interface</h1>
+    <hr>
+    <h2>Add a custom intent</h2>
+        <div id="addIntentStatus"></div>
+        <form id="intentAddForm">
+            <label for="name">Name:</label>
+            <input type="text" name="name" id="nameAdd"><br>
+            <label for="description">Description:</label>
+            <input type="text" name="description" id="descriptionAdd"><br>
+            <label for="utterances">Utterances (separated by ,):</label>
+            <input type="text" name="utterances" id="utterancesAdd"><br>
+            <label for="intent">Intent to send to robot:</label>
+            <input type="text" name="intent" id="intentAdd"><br>
+            <label for="paramname">Parameter Name (not required):</label>
+            <input type="text" name="paramname" id="paramnameAdd"><br>
+            <label for="paramvalue">Parameter Value (not required):</label>
+            <input type="text" name="paramvalue" id="paramvalueAdd"><br>
+            <label for="exec">Program to execute path in relation to chipper dir (ex. ../test.sh):</label>
+            <input type="text" name="exec" id="execAdd"><br>
+        </form>
+        <button onclick="sendIntentAdd()">Add Intent</button>
+    <hr>
+    <h2>Edit a custom intent</h2>
+    <div id="editSelect"></div>
+    <button onclick="editFormCreate()">Click to start editing the intent</button>
+    <div id="editIntentStatus"></div>
+    <div id="editIntentForm"></div>
+    <hr>
+    <h2>Delete a custom intent</h2>
+    <div id="editIntentStatus"></div>
+    <button onclick="deleteSelectedIntent()">Delete Intent</button>
+    <hr>
+</body>
+</html>

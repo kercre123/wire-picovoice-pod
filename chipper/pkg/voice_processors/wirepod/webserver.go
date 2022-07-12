@@ -178,7 +178,53 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Fprintf(w, ":)")
+		fmt.Fprintf(w, "intent edited successfully")
+		return
+	case r.URL.Path == "/api/get_custom_intents_json":
+		if _, err := os.Stat("./customIntents.json"); err == nil {
+			// do nothing
+		} else {
+			fmt.Fprintf(w, "err: you must create an intent first")
+			return
+		}
+		customIntentJSONFile, err := ioutil.ReadFile("./customIntents.json")
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Fprintf(w, string(customIntentJSONFile))
+		return
+	case r.URL.Path == "/api/remove_custom_intent":
+		number := r.FormValue("number")
+		if number == "" {
+			fmt.Fprintf(w, "err: a number is required")
+			return
+		}
+		if _, err := os.Stat("./customIntents.json"); err == nil {
+			// do nothing
+		} else {
+			fmt.Fprintf(w, "err: you must create an intent first")
+			return
+		}
+		var customIntentJSON intentsStruct
+		customIntentJSONFile, err := os.ReadFile("./customIntents.json")
+		if err != nil {
+			fmt.Println(err)
+		}
+		json.Unmarshal(customIntentJSONFile, &customIntentJSON)
+		newNumbera, err := strconv.Atoi(number)
+		newNumber := newNumbera - 1
+		if newNumber > len(customIntentJSON) {
+			fmt.Fprintf(w, "err: there are only "+strconv.Itoa(len(customIntentJSON))+" intents")
+			return
+		}
+		fmt.Println(customIntentJSON[newNumber].Name + " custom intent is being removed")
+		customIntentJSON = append(customIntentJSON[:newNumber], customIntentJSON[newNumber+1:]...)
+		newCustomIntentJSONFile, err := json.Marshal(customIntentJSON)
+		err = ioutil.WriteFile("./customIntents.json", newCustomIntentJSONFile, 0644)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Fprintf(w, "intent removed successfully")
 		return
 	}
 }
@@ -188,7 +234,7 @@ func StartWebServer() {
 	fileServer := http.FileServer(http.Dir("./webroot"))
 	http.Handle("/", fileServer)
 
-	fmt.Printf("Starting server at port 8080\n")
+	fmt.Printf("Starting server at port 8080 (http://localhost:8080)\n")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
