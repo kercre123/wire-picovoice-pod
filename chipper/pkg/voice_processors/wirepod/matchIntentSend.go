@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 
@@ -52,16 +53,38 @@ func IntentPass(req *vtt.IntentRequest, intentThing string, speechText string, i
 func customIntentHandler(req *vtt.IntentRequest, voiceText string, intentList []string, isOpus bool, justThisBotNum int) bool {
 	var successMatched bool = false
 	if _, err := os.Stat("./customIntents.json"); err == nil {
-		fmt.Println("Found customIntents.json")
 		var customIntentJSON intentsStruct
 		customIntentJSONFile, err := os.ReadFile("./customIntents.json")
 		json.Unmarshal(customIntentJSONFile, &customIntentJSON)
-		fmt.Println("Number of custom intents: " + strconv.Itoa(len(customIntentJSON)+1))
 		for _, c := range customIntentJSON {
 			for _, v := range c.Utterances {
 				if strings.Contains(voiceText, v) {
-					fmt.Println("Custom Intent Matched: " + c.Name + " - " + c.Description + " - " + c.Intent)
+					if debugLogging == true {
+						fmt.Println("Custom Intent Matched: " + c.Name + " - " + c.Description + " - " + c.Intent)
+					}
+					var intentParams map[string]string
+					var isParam bool = false
+					if c.Params.ParamValue != "" {
+						if debugLogging == true {
+							fmt.Println("Custom Intent Parameter: " + c.Params.ParamName + " - " + c.Params.ParamValue)
+						}
+						intentParams = map[string]string{c.Params.ParamName: c.Params.ParamValue}
+						isParam = true
+					}
+					customIntentExec := exec.Command("/bin/bash", c.Exec)
+					customOut, err := customIntentExec.Output()
+					if err != nil {
+						fmt.Println(err)
+					}
+					if debugLogging == true {
+						fmt.Println("Custom Intent Exec Output: " + string(customOut))
+					}
+					IntentPass(req, c.Intent, voiceText, intentParams, isParam, justThisBotNum)
 					successMatched = true
+					break
+				}
+				if successMatched == true {
+					break
 				}
 			}
 		}
@@ -77,25 +100,29 @@ func processTextAll(req *vtt.IntentRequest, voiceText string, listOfLists [][]st
 	var matched int = 0
 	var intentNum int = 0
 	var successMatched bool = false
-	customIntentHandler(req, voiceText, intentList, isOpus, justThisBotNum)
-	for _, b := range listOfLists {
-		for _, c := range b {
-			if strings.Contains(voiceText, c) {
-				if isOpus == true {
-					paramChecker(req, intentList[intentNum], voiceText, justThisBotNum)
-				} else {
-					prehistoricParamChecker(req, intentList[intentNum], voiceText, justThisBotNum)
+	customIntentMatched := customIntentHandler(req, voiceText, intentList, isOpus, justThisBotNum)
+	if customIntentMatched == false {
+		for _, b := range listOfLists {
+			for _, c := range b {
+				if strings.Contains(voiceText, c) {
+					if isOpus == true {
+						paramChecker(req, intentList[intentNum], voiceText, justThisBotNum)
+					} else {
+						prehistoricParamChecker(req, intentList[intentNum], voiceText, justThisBotNum)
+					}
+					successMatched = true
+					matched = 1
+					break
 				}
-				successMatched = true
-				matched = 1
+			}
+			if matched == 1 {
+				matched = 0
 				break
 			}
+			intentNum = intentNum + 1
 		}
-		if matched == 1 {
-			matched = 0
-			break
-		}
-		intentNum = intentNum + 1
+	} else {
+		successMatched = true
 	}
 	return successMatched
 }
