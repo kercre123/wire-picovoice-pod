@@ -36,6 +36,38 @@
     <div id="deleteIntentStatus"></div><br>
     <button onclick="deleteSelectedIntent()">Delete selected intent</button>
     <hr>
+    <h2>Add a bot configuration</h2>
+    <div id="botAddStatus"></div>
+    <form id="botAddForm">
+        <label for="esnAdd">Bot S/N (ex. 0060059b):</label>
+        <input type="text" name="esnAdd" id="esnAdd"><br>
+        <label for="locationAdd">Location:</label>
+        <input type="text" name="locationAdd" id="locationAdd"><br>
+        <label for="unitsAdd">Temperature Unit:</label>
+        <select name="unitsAdd" id="unitsAdd" form="botAddForm">
+            <option value="C">Celsius</option>
+            <option value="F">Fahrenheit</option>
+        </select><br>
+        <label for="firmwarePrefixAdd">Firmware:</label>
+        <select name="firmwarePrefixAdd" id="firmwarePrefixAdd" form="botAddForm">
+            <option value="1.6">1.6 and above</option>
+            <option value="1.5">1.0 - 1.5</option>
+            <option value="0.11">0.14 and below</option>
+        </select>
+    </form>
+    <button onclick="sendBotAdd()">Add bot</button>
+    <hr>
+    <h2>Edit a bot configuration</h2>
+    <div id="botEditSelect"></div>
+    <div id="botEditStatus"></div><br>
+    <button onclick="editBotFormCreate()">Start editing selected bot</button>
+    <div id="botEditForm"></div>
+    <hr>
+    <h2>Delete a bot configuration</h2>
+    <div id="botDeleteSelect"></div>
+    <div id="botDeleteStatus"></div><br>
+    <button onclick="deleteSelectedBot()">Delete selected bot</button>
+    <hr>
 </body>
 <script src="./js/customIntents.js"></script>
 </html>

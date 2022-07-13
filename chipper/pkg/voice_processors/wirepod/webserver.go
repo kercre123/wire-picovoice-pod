@@ -226,6 +226,210 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Fprintf(w, "intent removed successfully")
 		return
+	case r.URL.Path == "/api/add_bot":
+		botESN := r.FormValue("esn")
+		botLocation := r.FormValue("location")
+		botUnits := r.FormValue("units")
+		botFirmwarePrefix := r.FormValue("firmwareprefix")
+		var is_early_opus bool
+		var use_play_specific bool
+		if botESN == "" || botLocation == "" || botUnits == "" || botFirmwarePrefix == "" {
+			fmt.Fprintf(w, "err: all fields are required")
+			return
+		}
+		firmwareSplit := strings.Split(botFirmwarePrefix, ".")
+		if len(firmwareSplit) != 2 {
+			fmt.Fprintf(w, "err: firmware prefix must be in the format: 1.5")
+			return
+		}
+		if botUnits != "F" && botUnits != "C" {
+			fmt.Fprintf(w, "err: units must be either F or C")
+			return
+		}
+		firmware1, err := strconv.Atoi(firmwareSplit[0])
+		firmware2, err := strconv.Atoi(firmwareSplit[1])
+		if err != nil {
+			fmt.Fprintf(w, "err: firmware prefix must be in the format: 1.5")
+			return
+		}
+		if firmware1 >= 1 && firmware2 < 6 {
+			is_early_opus = false
+			use_play_specific = true
+		} else if firmware1 >= 1 && firmware2 >= 6 {
+			is_early_opus = false
+			use_play_specific = false
+		} else if firmware1 == 0 {
+			is_early_opus = true
+			use_play_specific = true
+		} else {
+			fmt.Fprintf(w, "err: firmware prefix must be in the format: 1.5")
+			return
+		}
+		type botConfigStruct []struct {
+			Esn             string `json:"esn"`
+			Location        string `json:"location"`
+			Units           string `json:"units"`
+			UsePlaySpecific bool   `json:"use_play_specific"`
+			IsEarlyOpus     bool   `json:"is_early_opus"`
+		}
+		var botConfig botConfigStruct
+		if _, err := os.Stat("./botConfig.json"); err == nil {
+			// read botConfig.json and append to it with the form information
+			botConfigFile, err := ioutil.ReadFile("./botConfig.json")
+			if err != nil {
+				fmt.Println(err)
+			}
+			json.Unmarshal(botConfigFile, &botConfig)
+			botConfig = append(botConfig, struct {
+				Esn             string `json:"esn"`
+				Location        string `json:"location"`
+				Units           string `json:"units"`
+				UsePlaySpecific bool   `json:"use_play_specific"`
+				IsEarlyOpus     bool   `json:"is_early_opus"`
+			}{Esn: botESN, Location: botLocation, Units: botUnits, UsePlaySpecific: use_play_specific, IsEarlyOpus: is_early_opus})
+			newBotConfigJSONFile, err := json.Marshal(botConfig)
+			err = ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			botConfig = append(botConfig, struct {
+				Esn             string `json:"esn"`
+				Location        string `json:"location"`
+				Units           string `json:"units"`
+				UsePlaySpecific bool   `json:"use_play_specific"`
+				IsEarlyOpus     bool   `json:"is_early_opus"`
+			}{Esn: botESN, Location: botLocation, Units: botUnits, UsePlaySpecific: use_play_specific, IsEarlyOpus: is_early_opus})
+			newBotConfigJSONFile, err := json.Marshal(botConfig)
+			err = ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+		fmt.Fprintf(w, "bot added successfully")
+		return
+	case r.URL.Path == "/api/remove_bot":
+		number := r.FormValue("number")
+		if _, err := os.Stat("./botConfig.json"); err == nil {
+			// do nothing
+		} else {
+			fmt.Fprintf(w, "err: you must create a bot first")
+			return
+		}
+		type botConfigStruct []struct {
+			Esn             string `json:"esn"`
+			Location        string `json:"location"`
+			Units           string `json:"units"`
+			UsePlaySpecific bool   `json:"use_play_specific"`
+			IsEarlyOpus     bool   `json:"is_early_opus"`
+		}
+		var botConfigJSON botConfigStruct
+		botConfigJSONFile, err := os.ReadFile("./botConfig.json")
+		if err != nil {
+			fmt.Println(err)
+		}
+		json.Unmarshal(botConfigJSONFile, &botConfigJSON)
+		newNumbera, err := strconv.Atoi(number)
+		newNumber := newNumbera - 1
+		if newNumber > len(botConfigJSON) {
+			fmt.Fprintf(w, "err: there are only "+strconv.Itoa(len(botConfigJSON))+" bots")
+			return
+		}
+		fmt.Println(botConfigJSON[newNumber].Esn + " bot is being removed")
+		botConfigJSON = append(botConfigJSON[:newNumber], botConfigJSON[newNumber+1:]...)
+		newBotConfigJSONFile, err := json.Marshal(botConfigJSON)
+		err = ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Fprintf(w, "bot removed successfully")
+		return
+	case r.URL.Path == "/api/edit_bot":
+		number := r.FormValue("number")
+		botESN := r.FormValue("esn")
+		botLocation := r.FormValue("location")
+		botUnits := r.FormValue("units")
+		botFirmwarePrefix := r.FormValue("firmwareprefix")
+		if botESN == "" || botLocation == "" || botUnits == "" || botFirmwarePrefix == "" {
+			fmt.Fprintf(w, "err: all fields are required")
+			return
+		}
+		firmwareSplit := strings.Split(botFirmwarePrefix, ".")
+		if len(firmwareSplit) != 2 {
+			fmt.Fprintf(w, "err: firmware prefix must be in the format: 1.5")
+			return
+		}
+		if botUnits != "F" && botUnits != "C" {
+			fmt.Fprintf(w, "err: units must be either F or C")
+			return
+		}
+		var is_early_opus bool
+		var use_play_specific bool
+		firmware1, err := strconv.Atoi(firmwareSplit[0])
+		firmware2, err := strconv.Atoi(firmwareSplit[1])
+		if err != nil {
+			fmt.Fprintf(w, "err: firmware prefix must be in the format: 1.5")
+			return
+		}
+		if firmware1 >= 1 && firmware2 < 6 {
+			is_early_opus = false
+			use_play_specific = true
+		} else if firmware1 >= 1 && firmware2 >= 6 {
+			is_early_opus = false
+			use_play_specific = false
+		} else if firmware1 == 0 {
+			is_early_opus = true
+			use_play_specific = true
+		} else {
+			fmt.Fprintf(w, "err: firmware prefix must be in the format: 1.5")
+			return
+		}
+		type botConfigStruct []struct {
+			Esn             string `json:"esn"`
+			Location        string `json:"location"`
+			Units           string `json:"units"`
+			UsePlaySpecific bool   `json:"use_play_specific"`
+			IsEarlyOpus     bool   `json:"is_early_opus"`
+		}
+		var botConfig botConfigStruct
+		if _, err := os.Stat("./botConfig.json"); err == nil {
+			// read botConfig.json and append to it with the form information
+			botConfigFile, err := ioutil.ReadFile("./botConfig.json")
+			if err != nil {
+				fmt.Println(err)
+			}
+			json.Unmarshal(botConfigFile, &botConfig)
+			newNumbera, err := strconv.Atoi(number)
+			newNumber := newNumbera - 1
+			botConfig[newNumber].Esn = botESN
+			botConfig[newNumber].Location = botLocation
+			botConfig[newNumber].Units = botUnits
+			botConfig[newNumber].UsePlaySpecific = use_play_specific
+			botConfig[newNumber].IsEarlyOpus = is_early_opus
+			newBotConfigJSONFile, err := json.Marshal(botConfig)
+			err = ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			fmt.Fprintln(w, "err: you must create a bot first")
+			return
+		}
+		fmt.Fprintf(w, "bot edited successfully")
+		return
+	case r.URL.Path == "/api/get_bot_json":
+		if _, err := os.Stat("./botConfig.json"); err == nil {
+			// do nothing
+		} else {
+			fmt.Fprintf(w, "err: you must add a bot first")
+			return
+		}
+		botConfigJSONFile, err := ioutil.ReadFile("./botConfig.json")
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Fprintf(w, string(botConfigJSONFile))
+		return
 	}
 }
 

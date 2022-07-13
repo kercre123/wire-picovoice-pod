@@ -3,6 +3,7 @@ package wirepod
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -20,26 +21,33 @@ func paramCheckerSlots(req *vtt.IntentRequest, intent string, slots map[string]s
 	var botUnits string = "F"
 	var botPlaySpecific bool = false
 	var botIsEarlyOpus bool = false
-	if _, err := os.Stat("./botConfigs/" + req.Device + ".json"); err == nil {
-		if debugLogging == true {
-			fmt.Println("Found bot config file for " + req.Device)
-		}
-		botConfigByte, err := os.ReadFile("./botConfigs/" + req.Device + ".json")
-		if err != nil {
-			fmt.Println(err)
-		}
-		type botConfigJSON struct {
+	if _, err := os.Stat("./botConfig.json"); err == nil {
+		type botConfigJSON []struct {
+			ESN             string `json:"ESN"`
 			Location        string `json:"location"`
 			Units           string `json:"units"`
 			UsePlaySpecific bool   `json:"use_play_specific"`
 			IsEarlyOpus     bool   `json:"is_early_opus"`
 		}
-		var botConfJSON botConfigJSON
-		json.Unmarshal(botConfigByte, &botConfJSON)
-		botLocation = botConfJSON.Location
-		botUnits = botConfJSON.Units
-		botPlaySpecific = botConfJSON.UsePlaySpecific
-		botIsEarlyOpus = botConfJSON.IsEarlyOpus
+		jsonFile, err := os.Open("./botConfig.json")
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer jsonFile.Close()
+		byteValue, _ := ioutil.ReadAll(jsonFile)
+		var botConfig botConfigJSON
+		json.Unmarshal(byteValue, &botConfig)
+		for _, bot := range botConfig {
+			if strings.ToLower(bot.ESN) == req.Device {
+				if debugLogging == true {
+					fmt.Println("Found bot config for " + bot.ESN)
+				}
+				botLocation = bot.Location
+				botUnits = bot.Units
+				botPlaySpecific = bot.UsePlaySpecific
+				botIsEarlyOpus = bot.IsEarlyOpus
+			}
+		}
 	}
 	if strings.Contains(intent, "volume") {
 		if slots["volume"] != "" {
@@ -199,26 +207,33 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 	var botUnits string = "F"
 	var botPlaySpecific bool = false
 	var botIsEarlyOpus bool = false
-	if _, err := os.Stat("./botConfigs/" + req.Device + ".json"); err == nil {
-		if debugLogging == true {
-			fmt.Println("Found bot config file for " + req.Device)
-		}
-		botConfigByte, err := os.ReadFile("./botConfigs/" + req.Device + ".json")
-		if err != nil {
-			fmt.Println(err)
-		}
-		type botConfigJSON struct {
+	if _, err := os.Stat("./botConfig.json"); err == nil {
+		type botConfigJSON []struct {
+			ESN             string `json:"ESN"`
 			Location        string `json:"location"`
 			Units           string `json:"units"`
 			UsePlaySpecific bool   `json:"use_play_specific"`
 			IsEarlyOpus     bool   `json:"is_early_opus"`
 		}
-		var botConfJSON botConfigJSON
-		json.Unmarshal(botConfigByte, &botConfJSON)
-		botLocation = botConfJSON.Location
-		botUnits = botConfJSON.Units
-		botPlaySpecific = botConfJSON.UsePlaySpecific
-		botIsEarlyOpus = botConfJSON.IsEarlyOpus
+		jsonFile, err := os.Open("./botConfig.json")
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer jsonFile.Close()
+		byteValue, _ := ioutil.ReadAll(jsonFile)
+		var botConfig botConfigJSON
+		json.Unmarshal(byteValue, &botConfig)
+		for _, bot := range botConfig {
+			if strings.ToLower(bot.ESN) == req.Device {
+				if debugLogging == true {
+					fmt.Println("Found bot config for " + bot.ESN)
+				}
+				botLocation = bot.Location
+				botUnits = bot.Units
+				botPlaySpecific = bot.UsePlaySpecific
+				botIsEarlyOpus = bot.IsEarlyOpus
+			}
+		}
 	}
 	if botPlaySpecific == true {
 		if strings.Contains(intent, "intent_play_blackjack") {
@@ -466,23 +481,31 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 	var intentParams map[string]string
 	var botLocation string = "San Francisco"
 	var botUnits string = "F"
-	if _, err := os.Stat("./botConfigs/" + req.Device + ".json"); err == nil {
-		if debugLogging == true {
-			fmt.Println("Found bot config file for " + req.Device)
-		}
-		botConfigByte, err := os.ReadFile("./botConfigs/" + req.Device + ".json")
-		if err != nil {
-			fmt.Println(err)
-		}
-		type botConfigJSON struct {
+	if _, err := os.Stat("./botConfig.json"); err == nil {
+		type botConfigJSON []struct {
+			ESN             string `json:"ESN"`
 			Location        string `json:"location"`
 			Units           string `json:"units"`
 			UsePlaySpecific bool   `json:"use_play_specific"`
+			IsEarlyOpus     bool   `json:"is_early_opus"`
 		}
-		var botConfJSON botConfigJSON
-		json.Unmarshal(botConfigByte, &botConfJSON)
-		botLocation = botConfJSON.Location
-		botUnits = botConfJSON.Units
+		jsonFile, err := os.Open("./botConfig.json")
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer jsonFile.Close()
+		byteValue, _ := ioutil.ReadAll(jsonFile)
+		var botConfig botConfigJSON
+		json.Unmarshal(byteValue, &botConfig)
+		for _, bot := range botConfig {
+			if strings.ToLower(bot.ESN) == req.Device {
+				if debugLogging == true {
+					fmt.Println("Found bot config for " + bot.ESN)
+				}
+				botLocation = bot.Location
+				botUnits = bot.Units
+			}
+		}
 	}
 	if strings.Contains(intent, "intent_photo_take_extend") {
 		isParam = true
