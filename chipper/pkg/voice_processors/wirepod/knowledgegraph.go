@@ -55,6 +55,7 @@ func InitHoundify() {
 				ClientID:  os.Getenv("HOUNDIFY_CLIENT_ID"),
 				ClientKey: os.Getenv("HOUNDIFY_CLIENT_KEY"),
 			}
+			hclient.EnableConversationState()
 			fmt.Println("Houndify initialized!")
 		}
 	} else {
@@ -67,12 +68,12 @@ var NoResultSpoken string
 
 var botNumKG int = 0
 
-func knowledgeAPI(sessionID string, spokenText string) string {
+func knowledgeAPI(spokenText string, req *vtt.KnowledgeGraphRequest) string {
 	if houndEnable == true {
 		hReq := houndify.TextRequest{
 			Query:             spokenText,
-			UserID:            "victor",
-			RequestID:         sessionID,
+			UserID:            req.Device,
+			RequestID:         req.Session,
 			RequestInfoFields: make(map[string]interface{}),
 		}
 		if debugLogging == true {
@@ -135,7 +136,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 	}
 	if botNum > picovoiceInstances {
 		fmt.Println("Too many bots are connected, sending error to bot " + strconv.Itoa(justThisBotNum))
-		NoResultSpoken = knowledgeAPI(req.Session, transcribedText)
+		NoResultSpoken = "Too many bots are connected, please try again later."
 		kg := pb.KnowledgeGraphResponse{
 			Session:     req.Session,
 			DeviceId:    req.Device,
@@ -359,7 +360,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 			break
 		}
 	}
-	NoResultSpoken = knowledgeAPI(req.Session, transcribedText)
+	NoResultSpoken = knowledgeAPI(transcribedText, req)
 	kg := pb.KnowledgeGraphResponse{
 		Session:     req.Session,
 		DeviceId:    req.Device,
