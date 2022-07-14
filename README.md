@@ -120,15 +120,6 @@ sudo ./setup.sh daemon-disable
 	- Follow the Linux instructions, located above the Windows instructions
 4. Try a voice command
 
-## Configure specific bots
-
-`./chipper/botSetup.sh` is there to help configure specific bots. This is not required for operation, and is there for only if you have multiple users using your instance of wire-picovoice-pod and you would like to use different locations/units for weather depending on the bot. It also helps chipper know if a bot is on an older version of VicOS so it can account for that. This is only a stand-in until jdocs and stuff get implemented.
-
-```
-Usage: ./chipper/botSetup.sh <esn> <firmware-prefix> "<location>" <units>
-Example: ./chipper/botSetup.sh 0060059b 1.8 "Des Moines, Iowa" F
-```
-
 ## 0.10-era bots
 
 0.10 and below use raw PCM streams rather than the modern Opus streams. This has support for those streams and no special configuration server-side is required for it. However: you will need to get a domain which is the same length as `chipper-dev.api.anki.com`, make sure to run this on a port that is 3 characters long (like the default 443), add true TLS certificates (can be done in ./chipper/source.sh. make sure to include the chain), and run these commands (SSHed into the bot):
@@ -178,6 +169,22 @@ Possible options:
 	- This is meant for less powerful Raspberry Pis like the 3B+ and the Pi Zero 2 W
 - `OnlyCheetah`
 	- Cheetah supports a mic stream while Leopard doesn't. Leopard has to transcribe all of the PCM data, which means it has to be transcribed up to 20 times per voice request for snappy end-of-speech detection. This is a little wasteful and uses up more seconds of allowed speech (Picovoice's free teir has 360000 seconds per 30 days). With Cheetah, I can just pipe the audio directly into it and it gives transcriptions. In my experience it is also as accurate and as fast as Leopard.
+
+## Web interface
+
+Chipper hosts a web interface at port 8080. This can be used to create custom intents and to configure specific bots.
+
+To get to it, open a browser and go to `http://serverip:8080`, replacing serverip with the IP address of the machine running the chipper server. If you are running the browser on the machine running chipper, you can go to `http://localhost:8080`
+
+- Custom intents
+	- Give your custom intent a name and description. Then choose an intent to send after the custom intent's action has been done. The custom intent's action can be chosen by the last entry, exec. You can also set a parameter for the intent if it needs one.
+	- The program in exec has to be in relation to the chipper directory, so if your script is in the wire-picovoice-pod directory, the exec would be `../custom.sh`
+	- The program specified in exec will be launched by /bin/bash, so to test your program in the console run `/bin/bash path/to/program`
+- Bot configurations
+	- Put in the bot's ESN - this allows chipper to match a robot with a configuration
+	- Put in your location - this is used for the weather command
+	- Select the temperature unit you would like to use - for weather command
+	- Select the firmware your bot is on - some intents changed throughout Vector's development
 
 ## Status
 
