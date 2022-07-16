@@ -24,6 +24,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		paramName := r.FormValue("paramname")
 		paramValue := r.FormValue("paramvalue")
 		exec := r.FormValue("exec")
+		execArgs := r.FormValue("execargs")
 		if name == "" || description == "" || utterances == "" || intent == "" {
 			fmt.Fprintf(w, "missing required field (name, description, utterances, and intent are required)")
 			return
@@ -43,25 +44,12 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 					ParamName  string `json:"paramname"`
 					ParamValue string `json:"paramvalue"`
 				} `json:"params"`
-				Exec string `json:"exec"`
+				Exec     string   `json:"exec"`
+				ExecArgs []string `json:"execargs"`
 			}{Name: name, Description: description, Utterances: strings.Split(utterances, ","), Intent: intent, Params: struct {
 				ParamName  string `json:"paramname"`
 				ParamValue string `json:"paramvalue"`
-			}{ParamName: paramName, ParamValue: paramValue}, Exec: exec})
-			var logParam string
-			var logExec string
-			if paramName == "" && paramValue == "" {
-				logParam = "No Parameters"
-			} else {
-				logParam = "Parameter Name: " + paramName + ", Parameter Value: " + paramValue
-			}
-			if exec == "" {
-				logExec = "No program to execute"
-			} else {
-				logExec = "Program to execute: " + exec
-			}
-			fmt.Println("New custom intent added. Name: " + name + ", Description: " + description + ", Utterances: " + utterances + ", " + logParam + ", " + logExec)
-			fmt.Println("Number of custom intents (newfile): " + strconv.Itoa(len(customIntentJSON)))
+			}{ParamName: paramName, ParamValue: paramValue}, Exec: exec, ExecArgs: strings.Split(execArgs, ",")})
 			customIntentJSONFile, err = json.Marshal(customIntentJSON)
 			if err != nil {
 				fmt.Println(err)
@@ -81,27 +69,15 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 					ParamName  string `json:"paramname"`
 					ParamValue string `json:"paramvalue"`
 				} `json:"params"`
-				Exec string `json:"exec"`
+				Exec     string   `json:"exec"`
+				ExecArgs []string `json:"execargs"`
 			}{{Name: name, Description: description, Utterances: strings.Split(utterances, ","), Intent: intent, Params: struct {
 				ParamName  string `json:"paramname"`
 				ParamValue string `json:"paramvalue"`
-			}{ParamName: paramName, ParamValue: paramValue}, Exec: exec}})
+			}{ParamName: paramName, ParamValue: paramValue}, Exec: exec, ExecArgs: strings.Split(execArgs, ",")}})
 			if err != nil {
 				fmt.Println(err)
 			}
-			var logParam string
-			var logExec string
-			if paramName == "" && paramValue == "" {
-				logParam = "No Parameters"
-			} else {
-				logParam = "Parameter Name: " + paramName + ", Parameter Value: " + paramValue
-			}
-			if exec == "" {
-				logExec = "No program to execute"
-			} else {
-				logExec = "Program to execute: " + exec
-			}
-			fmt.Println("New custom intent added. Name: " + name + ", Description: " + description + ", Utterances: " + utterances + ", " + logParam + ", " + logExec)
 			err = ioutil.WriteFile("./customIntents.json", customIntentJSONFile, 0644)
 			if err != nil {
 				fmt.Println(err)
@@ -118,6 +94,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		paramName := r.FormValue("paramname")
 		paramValue := r.FormValue("paramvalue")
 		exec := r.FormValue("exec")
+		execArgs := r.FormValue("execargs")
 		if number == "" {
 			fmt.Fprintf(w, "err: a number is required")
 			return
@@ -144,34 +121,29 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "err: there are only "+strconv.Itoa(len(customIntentJSON))+" intents")
 			return
 		}
-		fmt.Println(customIntentJSON[newNumber].Name + " custom intent is being edited")
 		if name != "" {
 			customIntentJSON[newNumber].Name = name
-			fmt.Println("Name changed to " + name)
 		}
 		if description != "" {
 			customIntentJSON[newNumber].Description = description
-			fmt.Println("Description changed to " + description)
 		}
 		if utterances != "" {
 			customIntentJSON[newNumber].Utterances = strings.Split(utterances, ",")
-			fmt.Println("Utterances changed to " + utterances)
 		}
 		if intent != "" {
 			customIntentJSON[newNumber].Intent = intent
-			fmt.Println("Intent changed to " + intent)
 		}
 		if paramName != "" {
 			customIntentJSON[newNumber].Params.ParamName = paramName
-			fmt.Println("Parameter name changed to " + paramName)
 		}
 		if paramValue != "" {
 			customIntentJSON[newNumber].Params.ParamValue = paramValue
-			fmt.Println("Parameter value changed to " + paramValue)
 		}
 		if exec != "" {
 			customIntentJSON[newNumber].Exec = exec
-			fmt.Println("Program to execute changed to " + exec)
+		}
+		if execArgs != "" {
+			customIntentJSON[newNumber].ExecArgs = strings.Split(execArgs, ",")
 		}
 		newCustomIntentJSONFile, err := json.Marshal(customIntentJSON)
 		err = ioutil.WriteFile("./customIntents.json", newCustomIntentJSONFile, 0644)
@@ -217,7 +189,6 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "err: there are only "+strconv.Itoa(len(customIntentJSON))+" intents")
 			return
 		}
-		fmt.Println(customIntentJSON[newNumber].Name + " custom intent is being removed")
 		customIntentJSON = append(customIntentJSON[:newNumber], customIntentJSON[newNumber+1:]...)
 		newCustomIntentJSONFile, err := json.Marshal(customIntentJSON)
 		err = ioutil.WriteFile("./customIntents.json", newCustomIntentJSONFile, 0644)

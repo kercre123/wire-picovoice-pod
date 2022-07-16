@@ -161,6 +161,16 @@ function editFormCreate() {
             execLabel.innerHTML = "Exec: "
             execLabel.htmlFor = "exec";
             exec.value = intentResponse["exec"];
+            // execargs
+            var execargs = document.createElement("input");
+            execargs.type = "text";
+            execargs.name = "execargs";
+            execargs.id = "execargs";
+            // create label for execargs
+            var execargsLabel = document.createElement("label");
+            execargsLabel.innerHTML = "Exec Args: "
+            execargsLabel.htmlFor = "execargs";
+            execargs.value = intentResponse["execargs"];
             // create button that launches function
             var submit = document.createElement("button");
             submit.type = "button";
@@ -182,6 +192,8 @@ function editFormCreate() {
             form.appendChild(paramvalueLabel).appendChild(paramvalue);
             form.appendChild(document.createElement("br"));
             form.appendChild(execLabel).appendChild(exec);
+            form.appendChild(document.createElement("br"));
+            form.appendChild(execargsLabel).appendChild(execargs);
             form.appendChild(document.createElement("br"));
             form.appendChild(submit);
             document.getElementById("editIntentForm").innerHTML = "";
@@ -216,6 +228,7 @@ function editIntent(intentNumber) {
         formData.append("paramname", document.getElementById("paramname").value);
         formData.append("paramvalue", document.getElementById("paramvalue").value);
         formData.append("exec", document.getElementById("exec").value);
+        formData.append("execargs", document.getElementById("execargs").value);
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "/api/edit_custom_intent");
         xhr.send(formData);
@@ -271,7 +284,7 @@ function deleteSelectedIntent() {
 
 function sendIntentAdd() {
     const form = document.getElementById('intentAddForm');
-    var data = "name=" + form.elements['nameAdd'].value + "&description=" + form.elements['descriptionAdd'].value + "&utterances=" + form.elements['utterancesAdd'].value + "&intent=" + form.elements['intentAddSelectintents'].value + "&paramname=" + form.elements['paramnameAdd'].value + "&paramvalue=" + form.elements['paramvalueAdd'].value + "&exec=" + form.elements['execAdd'].value;
+    var data = "name=" + form.elements['nameAdd'].value + "&description=" + form.elements['descriptionAdd'].value + "&utterances=" + form.elements['utterancesAdd'].value + "&intent=" + form.elements['intentAddSelectintents'].value + "&paramname=" + form.elements['paramnameAdd'].value + "&paramvalue=" + form.elements['paramvalueAdd'].value + "&exec=" + form.elements['execAdd'].value + "&execargs=" + form.elements['execAddArgs'].value;
     var client = new HttpClient();
     var result = document.getElementById('addIntentStatus');
     const resultP = document.createElement('p');

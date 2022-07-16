@@ -21,7 +21,8 @@ type intentsStruct []struct {
 		ParamName  string `json:"paramname"`
 		ParamValue string `json:"paramvalue"`
 	} `json:"params"`
-	Exec string `json:"exec"`
+	Exec     string   `json:"exec"`
+	ExecArgs []string `json:"execargs"`
 }
 
 func IntentPass(req *vtt.IntentRequest, intentThing string, speechText string, intentParams map[string]string, isParam bool, justThisBotNum int) (*vtt.IntentResponse, error) {
@@ -71,13 +72,31 @@ func customIntentHandler(req *vtt.IntentRequest, voiceText string, intentList []
 						intentParams = map[string]string{c.Params.ParamName: c.Params.ParamValue}
 						isParam = true
 					}
-					customIntentExec := exec.Command("/bin/bash", c.Exec)
+					var args []string
+					for _, arg := range c.ExecArgs {
+						if arg == "!botSerial" {
+							arg = req.Device
+						}
+						args = append(args, arg)
+					}
+					var customIntentExec *exec.Cmd
+					if len(args) == 0 {
+						if debugLogging == true {
+							fmt.Println("Executing: " + c.Exec)
+						}
+						customIntentExec = exec.Command(c.Exec)
+					} else {
+						if debugLogging == true {
+							fmt.Println("Executing: " + c.Exec + " " + strings.Join(args, " "))
+						}
+						customIntentExec = exec.Command(c.Exec, args...)
+					}
 					customOut, err := customIntentExec.Output()
 					if err != nil {
 						fmt.Println(err)
 					}
 					if debugLogging == true {
-						fmt.Println("Custom Intent Exec Output: " + string(customOut))
+						fmt.Println("Custom Intent Exec Output: " + strings.TrimSpace(string(customOut)))
 					}
 					IntentPass(req, c.Intent, voiceText, intentParams, isParam, justThisBotNum)
 					successMatched = true

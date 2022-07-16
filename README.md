@@ -6,7 +6,7 @@ This repo is a copy of [wire-pod](https://github.com/kercre123/wire-pod) but ins
 
 ## Program descriptions
 
-`chipper` - Chipper is a program used on Digital Dream Lab's servers which takes in a Vector's voice stream, puts it into a speech-to-text processor, and spits out an intent. This is also likely used on the official escape pod. This repo contains an older tree of chipper which does not have the "intent graph" feature (it caused an error upon every new stream), and it now has a working voice processor.
+`chipper` - Chipper is a program used on Digital Dream Lab's servers which takes in a Vector's voice stream, puts it into a speech-to-text processor, and spits out an intent. This is the same program powering the official escape pod. This repo contains an older tree of chipper which does not have the "intent graph" feature due to it causing an error upon every new stream.
 
 `vector-cloud` - Vector-cloud is the program which runs on Vector himself which uploads the mic stream to a chipper instance. This repo has an older tree of vector-cloud which also does not have the "intent graph" feature and has been modified to allow for a custom CA cert.
 
@@ -177,14 +177,13 @@ Chipper hosts a web interface at port 8080. This can be used to create custom in
 To get to it, open a browser and go to `http://serverip:8080`, replacing serverip with the IP address of the machine running the chipper server. If you are running the browser on the machine running chipper, you can go to `http://localhost:8080`
 
 - Custom intents
-	- Give your custom intent a name and description. Then choose an intent to send after the custom intent's action has been done. The custom intent's action can be chosen by the last entry, exec. You can also set a parameter for the intent if it needs one.
-	- The program in exec has to be in relation to the chipper directory, so if your script is in the wire-picovoice-pod directory, the exec would be `../custom.sh`
-	- The program specified in exec will be launched by /bin/bash, so to test your program in the console run `/bin/bash path/to/program`
+	- Example: You want to create a custom intent that allows Vector to turn the lights off. The transcribed text that matches to this intent should include "lights off" and other variations like "lid off" for better detection. It will execute a python script located in your user directory called `vector-lights-off.py`. This script turns the lights off and connects to Vector so he says "The lights are off!". You have multiple bots registered with the SDK so a serial number must be specified. After the SDK program is complete, chipper should send `intent_greeting_goodnight`. The following screenshot is a correct configuration for this case. The `Add intent` button would be pressed after everything is put in.
+	- ![Custom Intent Screenshot](./images/customIntent.png)
+	- The last entry cannot be seen fully here, it contains `../../vector-lights-on.py,--serial,!botSerial`
+	- (If `!botSerial` is put into the program arguments, chipper will substitute it for the serial number of the bot that is making a request to it.)
 - Bot configurations
-	- Put in the bot's ESN - this allows chipper to match a robot with a configuration
-	- Put in your location - this is used for the weather command
-	- Select the temperature unit you would like to use - for weather command
-	- Select the firmware your bot is on - some intents changed throughout Vector's development
+	- Example: You have a bot on 1.6 with a serial number of 0060059b; located in Des Moines, Iowa; and you would like to use Fahrenheit for the temperature unit in the weather command. The following screenshot is a correct configuration for that bot. Once that is input, you would press "Add bot". It would then be registered with chipper.
+	- ![Bot Configuration Screenshot](./images/botConfig.png)
 
 ## Status
 
