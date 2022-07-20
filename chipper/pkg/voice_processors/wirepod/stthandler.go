@@ -254,6 +254,7 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 			if chunkErr != nil {
 				if chunkErr == io.EOF {
 					//IntentPass(req, "intent_system_noaudio", "EOF error", map[string]string{"error": "EOF"}, true, justThisBotNum)
+					botNum = botNum - 1
 					return "", transcribedSlots, false, justThisBotNum, isOpus, fmt.Errorf("EOF error")
 					break
 				}
@@ -264,6 +265,7 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 			if chunkErr != nil {
 				if chunkErr == io.EOF {
 					//IntentPass(req, "intent_system_noaudio", "EOF error", map[string]string{"error": "EOF"}, true, justThisBotNum)
+					botNum = botNum - 1
 					return "", transcribedSlots, false, justThisBotNum, isOpus, fmt.Errorf("EOF error")
 					break
 				}
