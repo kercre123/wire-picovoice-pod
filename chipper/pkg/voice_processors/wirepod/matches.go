@@ -30,7 +30,7 @@ var wheelieList = []string{"pop a w", "polwhele", "olwen", "i wieland", "do a wh
 var fistbumpList = []string{"this pomp", "this pump", "bump", "fistb", "fistf", "this book", "pisto", "with pomp",
 	"fison", "first", "fifth", "were fifteen", "if bump", "wisdom", "this bu"}
 var blackjackList = []string{"black", "cards", "game"}
-var affirmativeList = []string{"yes", "correct"}
+var affirmativeList = []string{"yes", "correct", "sure"}
 var negativeList = []string{"no", "dont"}
 var photoList = []string{"photo", "foto", "selby", "capture", "picture"}
 var praiseList = []string{"good", "awesome", "also", "as some", "of them", "battle", "t rob", "the ro", "amazing", "woodcourt"}
