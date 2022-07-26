@@ -28,7 +28,7 @@ var rollCubeList = []string{"roll cu", "roll your cu", "all your cu", "roll huma
 var wheelieList = []string{"pop a w", "polwhele", "olwen", "i wieland", "do a wheel", "doorstone", "thibetan", "powell",
 	"welst", "a wheel", "willie", "a really", "o' billy"}
 var fistbumpList = []string{"this pomp", "this pump", "bump", "fistb", "fistf", "this book", "pisto", "with pomp",
-	"fison", "first", "fifth", "were fifteen", "if bump", "wisdom", "this bu"}
+	"fison", "first", "fifth", "were fifteen", "if bump", "wisdom", "this bu", "fist bomb", "fist ball", "this ball", "system"}
 var blackjackList = []string{"black", "cards", "game"}
 var affirmativeList = []string{"yes", "correct", "sure"}
 var negativeList = []string{"no", "dont"}
