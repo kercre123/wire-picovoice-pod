@@ -149,11 +149,7 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 	}
 	stream := opus.OggStream{}
 	go func() {
-		if isOpus == true {
-			time.Sleep(time.Millisecond * 500)
-		} else {
-			time.Sleep(time.Millisecond * 1100)
-		}
+		time.Sleep(time.Millisecond * 500)
 		for voiceTimer < 7 {
 			voiceTimer = voiceTimer + 1
 			time.Sleep(time.Millisecond * 750)
@@ -254,6 +250,9 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 			if chunkErr != nil {
 				if chunkErr == io.EOF {
 					//IntentPass(req, "intent_system_noaudio", "EOF error", map[string]string{"error": "EOF"}, true, justThisBotNum)
+					if picovoiceModeOS == "OnlyCheetah" {
+						cheetahSTT.Flush()
+					}
 					botNum = botNum - 1
 					return "", transcribedSlots, false, justThisBotNum, isOpus, fmt.Errorf("EOF error")
 					break
@@ -265,8 +264,21 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 			if chunkErr != nil {
 				if chunkErr == io.EOF {
 					//IntentPass(req, "intent_system_noaudio", "EOF error", map[string]string{"error": "EOF"}, true, justThisBotNum)
+					if picovoiceModeOS == "OnlyCheetah" {
+						cheetahSTT.Flush()
+					}
 					botNum = botNum - 1
 					return "", transcribedSlots, false, justThisBotNum, isOpus, fmt.Errorf("EOF error")
+					break
+				} else {
+					if debugLogging == true {
+						fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Error: " + chunkErr.Error())
+					}
+					if picovoiceModeOS == "OnlyCheetah" {
+						cheetahSTT.Flush()
+					}
+					botNum = botNum - 1
+					return "", transcribedSlots, false, justThisBotNum, isOpus, fmt.Errorf("Unknown error")
 					break
 				}
 			}
@@ -305,7 +317,7 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 								if picovoiceModeOS == "OnlyRhino" {
 									die = true
 								} else {
-									fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + ": " + "Rhino STI failed, falling back to Leopard STT")
+									fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " " + "Rhino STI failed, falling back to Leopard STT")
 								}
 								break
 							}
@@ -344,7 +356,12 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 							fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
 						}
 					}
-					if isEndpoint {
+					if isEndpoint == true || voiceTimer > 6 {
+						if voiceTimer > 6 {
+							if debugLogging == true {
+								fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " " + "No endpoint detected, flushing Cheetah STT")
+							}
+						}
 						finalTranscript, err := cheetahSTT.Flush()
 						transcribedText = strings.TrimSpace(strings.ToLower(transcribedText + finalTranscript))
 						if debugLogging == true {

@@ -11,8 +11,7 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 	var successMatched bool
 	transcribedText, transcribedSlots, isRhino, justThisBotNum, isOpus, err := sttHandler(req, false)
 	if err != nil {
-		fmt.Println(err)
-		IntentPass(req, "intent_system_noaudio", "EOF error", map[string]string{"error": err.Error()}, true, justThisBotNum)
+		IntentPass(req, "intent_system_noaudio", "voice processing error", map[string]string{"error": err.Error()}, true, justThisBotNum)
 		return nil, nil
 	}
 	if isRhino == true {
