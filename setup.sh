@@ -205,11 +205,18 @@ function makeSource() {
    fi
    cd chipper
    rm -f ./source.sh
-   read -p "What port would you like to use? (443): " portPrompt
+   read -p "What port would you like to use for the voice server itself? (443): " portPrompt
    if [[ -n ${portPrompt} ]]; then
       port=${portPrompt}
    else
       port="443"
+   fi
+   echo
+   read -p "What port would you like to use for the HTTP webserver used for custom intents, bot configuration, etc? (8080): " webportPrompt
+   if [[ -n ${webportPrompt} ]]; then
+      webport=${webportPrompt}
+   else
+      webport="8080"
    fi
    if netstat -pln | grep :${port}; then
       echo
@@ -349,6 +356,7 @@ function makeSource() {
       echo "export HOUNDIFY_ENABLED=false" >> source.sh
    fi
    echo "export PICOVOICE_APIKEY=${picovoiceKey}" >> source.sh
+   echo "export WEBSERVER_PORT=${webport}" >> source.sh
    echo "export DEBUG_LOGGING=true" >> source.sh
    cd ..
    echo
@@ -420,17 +428,25 @@ function scpToBot() {
       echo "PubkeyAcceptedKeyTypes +ssh-rsa" >> /etc/ssh/ssh_config
       botBuildProp=$(ssh -i ${keyPath} root@${botAddress} "cat /build.prop")
    fi
+   scp -v -i ${keyPath} root@${botAddress}:/build.prop /tmp/scpTest > /tmp/scpTest 2>> /tmp/scpTest
+   scpTest=$(cat /tmp/scpTest)
+   if [[ "${scpTest}" == *"sftp"* ]]; then
+      oldVar="-O"
+   else
+      oldVar=""
+   fi
    if [[ ! "${botBuildProp}" == *"ro.build"* ]]; then
       echo "Unable to communicate with robot. The key may be invalid, the bot may not be unlocked, or this device and the robot are not on the same network."
       exit 0
    fi
    ssh -i ${keyPath} root@${botAddress} "mount -o rw,remount / && systemctl stop vic-cloud && mv /anki/data/assets/cozmo_resources/config/server_config.json /anki/data/assets/cozmo_resources/config/server_config.json.bak"
-   scp -O -i ${keyPath} ./vector-cloud/build/vic-cloud root@${botAddress}:/anki/bin/
-   scp -O -i ${keyPath} ./vector-cloud/weather_weathercompany.json root@${botAddress}:/anki/data/assets/cozmo_resources/config/engine/behaviorComponent/weather/weatherResponseMaps/
-   scp -O -i ${keyPath} ./certs/server_config.json root@${botAddress}:/anki/data/assets/cozmo_resources/config/
-   scp -O -i ${keyPath} ./certs/cert.crt root@${botAddress}:/data/data/customCaCert.crt
+   scp ${oldVar} -i ${keyPath} ./vector-cloud/build/vic-cloud root@${botAddress}:/anki/bin/
+   scp ${oldVar} -i ${keyPath} ./vector-cloud/weather_weathercompany.json root@${botAddress}:/anki/data/assets/cozmo_resources/config/engine/behaviorComponent/weather/weatherResponseMaps/
+   scp ${oldVar} -i ${keyPath} ./certs/server_config.json root@${botAddress}:/anki/data/assets/cozmo_resources/config/
+   scp ${oldVar} -i ${keyPath} ./certs/cert.crt root@${botAddress}:/data/data/customCaCert.crt
    ssh -i ${keyPath} root@${botAddress} "chmod +rwx /anki/data/assets/cozmo_resources/config/server_config.json /anki/bin/vic-cloud /data/data/customCaCert.crt && systemctl start vic-cloud"
    rm -f /tmp/sshTest
+   rm -f /tmp/scpTest
    echo
    echo "Everything has been copied to the bot! While you don't need to reboot Vector for voice commands to work with your custom server, you will need to reboot Vector for the weather command to work correctly."
    echo

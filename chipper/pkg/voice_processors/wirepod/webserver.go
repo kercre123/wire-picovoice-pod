@@ -375,12 +375,22 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func StartWebServer() {
+	var webPort string
 	http.HandleFunc("/api/", apiHandler)
 	fileServer := http.FileServer(http.Dir("./webroot"))
 	http.Handle("/", fileServer)
-
-	fmt.Printf("Starting server at port 8080 (http://localhost:8080)\n")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if os.Getenv("WEBSERVER_PORT") != "" {
+		if _, err := strconv.Atoi(os.Getenv("WEBSERVER_PORT")); err == nil {
+			webPort = os.Getenv("WEBSERVER_PORT")
+		} else {
+			fmt.Println("WEBSERVER_PORT contains letters, using default of 8080")
+			webPort = "8080"
+		}
+	} else {
+		webPort = "8080"
+	}
+	fmt.Printf("Starting webserver at port " + webPort + " (http://localhost:" + webPort + ")\n")
+	if err := http.ListenAndServe(":"+webPort, nil); err != nil {
 		log.Fatal(err)
 	}
 }
