@@ -1,10 +1,8 @@
 package wirepod
 
 import (
-	"encoding/binary"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -21,20 +19,6 @@ var debugLogging bool
 
 var botNum int = 0
 var disableLiveTranscription bool = false
-
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
-func samplesToBytes(buf []int16) []byte {
-	output := make([]byte, len(buf)*2)
-	for i := 0; i < len(buf); i++ {
-		binary.LittleEndian.PutUint16(output[2*i:2*(i+1)], uint16(buf[i]))
-	}
-	return output
-}
 
 func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString string, slots map[string]string, isRhino bool, thisBotNum int, opusUsed bool, err error) {
 	var req2 *vtt.IntentRequest
@@ -76,7 +60,7 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 	botNum = botNum + 1
 	justThisBotNum := botNum
 	if botNum > 1 {
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("Multiple bots are streaming, live transcription disabled")
 		}
 		disableLiveTranscription = true
@@ -87,7 +71,7 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 		leopardFallback = true
 	}
 	if os.Getenv("DISABLE_LIVE_TRANSCRIPTION") == "true" {
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("DISABLE_LIVE_TRANSCRIPTION is true, live transcription disabled")
 		}
 		disableLiveTranscription = true
@@ -96,7 +80,7 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 		fmt.Println("Too many bots are connected, sending error to bot " + strconv.Itoa(justThisBotNum))
 		//IntentPass(req, "intent_system_noaudio", "Too many bots, max is 5", map[string]string{"error": "EOF"}, true, justThisBotNum)
 		botNum = botNum - 1
-		return "", transcribedSlots, false, justThisBotNum, false, fmt.Errorf("Too many bots are connected, max is 3")
+		return "", transcribedSlots, false, justThisBotNum, false, fmt.Errorf("too many bots are connected, max is 3")
 	} else {
 		if picovoiceModeOS == "OnlyLeopard" || picovoiceModeOS == "LeopardAndRhino" {
 			leopardSTT = leopardSTTArray[botNum-1]
@@ -108,8 +92,8 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 			cheetahSTT = cheetahSTTArray[botNum-1]
 		}
 	}
-	if debugLogging == true {
-		if isKnowledgeGraph == true {
+	if debugLogging {
+		if isKnowledgeGraph {
 			fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " ESN: " + req1.Device)
 			fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Session: " + req1.Session)
 			fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Language: " + req1.LangString)
@@ -121,15 +105,15 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 			fmt.Println("Stream " + strconv.Itoa(justThisBotNum) + " opened.")
 		}
 	}
-	if isKnowledgeGraph == true && picovoiceModeOS == "LeopardAndRhino" {
+	if isKnowledgeGraph && picovoiceModeOS == "LeopardAndRhino" {
 		leopardFallback = true
 		rhinoDone = true
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " making Knowledge Graph request, using Leopard")
 		}
 	}
 	data := []byte{}
-	if isKnowledgeGraph == true {
+	if isKnowledgeGraph {
 		data = append(data, req1.FirstReq.InputAudio...)
 	} else {
 		data = append(data, req2.FirstReq.InputAudio...)
@@ -137,12 +121,12 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 	if len(data) > 0 {
 		if data[0] == 0x4f {
 			isOpus = true
-			if debugLogging == true {
+			if debugLogging {
 				fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Stream Type: Opus")
 			}
 		} else {
 			isOpus = false
-			if debugLogging == true {
+			if debugLogging {
 				fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Stream Type: PCM")
 			}
 		}
@@ -160,30 +144,27 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 			disableLiveTranscription = true
 		}
 		if picovoiceModeOS == "OnlyLeopard" || picovoiceModeOS == "LeopardAndRhino" {
-			for doSTT == true {
-				if leopardFallback == true {
-					if micDataLeopard != nil && die == false && voiceTimer > 0 {
-						if sayStarting == true {
-							if debugLogging == true {
+			for doSTT {
+				if leopardFallback {
+					if micDataLeopard != nil && !die && voiceTimer > 0 {
+						if sayStarting {
+							if debugLogging {
 								fmt.Printf("Transcribing stream %d...\n", justThisBotNum)
 							}
 							sayStarting = false
 						}
 						processOneData := micDataLeopard
-						transcription1Raw, err := leopardSTT.Process(processOneData)
-						if err != nil {
-							log.Println(err)
-						}
+						transcription1Raw, _ := leopardSTT.Process(processOneData)
 						transcription1 = strings.ToLower(transcription1Raw)
-						if debugLogging == true {
-							if disableLiveTranscription == false {
+						if debugLogging {
+							if !disableLiveTranscription {
 								fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription1)
 							}
 						}
 						if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
 							transcribedText = transcription1
-							if debugLogging == true {
-								if disableLiveTranscription == false {
+							if debugLogging {
+								if !disableLiveTranscription {
 									fmt.Printf("\n")
 								} else {
 									fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
@@ -193,8 +174,8 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 							break
 						} else if voiceTimer == 7 {
 							transcribedText = transcription2
-							if debugLogging == true {
-								if disableLiveTranscription == false {
+							if debugLogging {
+								if !disableLiveTranscription {
 									fmt.Printf("\n")
 								} else {
 									fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
@@ -205,20 +186,17 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 						}
 						time.Sleep(time.Millisecond * 200)
 						processTwoData := micDataLeopard
-						transcription2Raw, err := leopardSTT.Process(processTwoData)
-						if err != nil {
-							log.Println(err)
-						}
+						transcription2Raw, _ := leopardSTT.Process(processTwoData)
 						transcription2 = strings.ToLower(transcription2Raw)
-						if debugLogging == true {
-							if disableLiveTranscription == false {
+						if debugLogging {
+							if !disableLiveTranscription {
 								fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcription2)
 							}
 						}
 						if transcription1 != "" && transcription2 != "" && transcription1 == transcription2 {
 							transcribedText = transcription1
-							if debugLogging == true {
-								if disableLiveTranscription == false {
+							if debugLogging {
+								if !disableLiveTranscription {
 									fmt.Printf("\n")
 								} else {
 									fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
@@ -228,8 +206,8 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 							break
 						} else if voiceTimer == 7 {
 							transcribedText = transcription2
-							if debugLogging == true {
-								if disableLiveTranscription == false {
+							if debugLogging {
+								if !disableLiveTranscription {
 									fmt.Printf("\n")
 								} else {
 									fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
@@ -245,7 +223,7 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 		}
 	}()
 	for {
-		if isKnowledgeGraph == true {
+		if isKnowledgeGraph {
 			chunk, chunkErr := req1.Stream.Recv()
 			if chunkErr != nil {
 				if chunkErr == io.EOF {
@@ -255,7 +233,6 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 					}
 					botNum = botNum - 1
 					return "", transcribedSlots, false, justThisBotNum, isOpus, fmt.Errorf("EOF error")
-					break
 				}
 			}
 			data = append(data, chunk.InputAudio...)
@@ -269,22 +246,20 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 					}
 					botNum = botNum - 1
 					return "", transcribedSlots, false, justThisBotNum, isOpus, fmt.Errorf("EOF error")
-					break
 				} else {
-					if debugLogging == true {
+					if debugLogging {
 						fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Error: " + chunkErr.Error())
 					}
 					if picovoiceModeOS == "OnlyCheetah" {
 						cheetahSTT.Flush()
 					}
 					botNum = botNum - 1
-					return "", transcribedSlots, false, justThisBotNum, isOpus, fmt.Errorf("Unknown error")
-					break
+					return "", transcribedSlots, false, justThisBotNum, isOpus, fmt.Errorf("unknown error")
 				}
 			}
 			data = append(data, chunk.InputAudio...)
 		}
-		if die == true {
+		if die {
 			break
 		}
 		// returns []int16, framesize unknown
@@ -294,7 +269,7 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 			micDataRhino = bytesToIntRhino(stream, data, die, isOpus)
 			numInRange = 0
 			for _, sample := range micDataRhino {
-				if rhinoDone == false {
+				if !rhinoDone {
 					if numInRange >= oldDataLength {
 						isFinalized, err := rhinoSTI.Process(sample)
 						if isFinalized {
@@ -333,7 +308,7 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 				}
 			}
 			oldDataLength = len(micDataRhino)
-			if die == true {
+			if die {
 				break
 			}
 		}
@@ -343,8 +318,8 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 			numInRange = 0
 			for _, sample := range micDataRhino {
 				if numInRange >= oldDataLength {
-					if sayStarting == true {
-						if debugLogging == true {
+					if sayStarting {
+						if debugLogging {
 							fmt.Printf("Transcribing stream %d...\n", justThisBotNum)
 						}
 						sayStarting = false
@@ -352,20 +327,20 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 					partialTranscript, isEndpoint, err := cheetahSTT.Process(sample)
 					if partialTranscript != "" {
 						transcribedText = strings.ToLower(transcribedText + strings.TrimSpace(partialTranscript) + " ")
-						if debugLogging == true && disableLiveTranscription == false {
+						if debugLogging && !disableLiveTranscription {
 							fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Transcription: " + transcribedText)
 						}
 					}
-					if isEndpoint == true || voiceTimer > 6 {
+					if isEndpoint || voiceTimer > 6 {
 						if voiceTimer > 6 {
-							if debugLogging == true {
+							if debugLogging {
 								fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " " + "No endpoint detected, flushing Cheetah STT")
 							}
 						}
-						finalTranscript, err := cheetahSTT.Flush()
+						finalTranscript, _ := cheetahSTT.Flush()
 						transcribedText = strings.TrimSpace(strings.ToLower(transcribedText + finalTranscript))
-						if debugLogging == true {
-							if disableLiveTranscription == false {
+						if debugLogging {
+							if !disableLiveTranscription {
 								fmt.Printf("\rBot " + strconv.Itoa(justThisBotNum) + " Final Transcription: " + transcribedText + "\n")
 							} else {
 								fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Final Transcription: " + transcribedText)
@@ -373,9 +348,6 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 						}
 						die = true
 						break
-						if err != nil {
-							fmt.Println("Error: " + err.Error())
-						}
 					}
 					if err != nil {
 						fmt.Println("Error: " + err.Error())
@@ -387,17 +359,17 @@ func sttHandler(reqThing interface{}, isKnowledgeGraph bool) (transcribedString 
 				}
 			}
 			oldDataLength = len(micDataRhino)
-			if die == true {
+			if die {
 				break
 			}
 		}
 	}
 	botNum = botNum - 1
-	if debugLogging == true {
+	if debugLogging {
 		fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " request served.")
 	}
 	var rhinoUsed bool
-	if rhinoSucceeded == true {
+	if rhinoSucceeded {
 		rhinoUsed = true
 	} else {
 		rhinoUsed = false

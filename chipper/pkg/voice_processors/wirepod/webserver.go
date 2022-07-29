@@ -32,7 +32,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		if _, err := os.Stat("./customIntents.json"); err == nil {
 			fmt.Println("Found customIntents.json")
 			var customIntentJSON intentsStruct
-			customIntentJSONFile, err := os.ReadFile("./customIntents.json")
+			customIntentJSONFile, _ := os.ReadFile("./customIntents.json")
 			json.Unmarshal(customIntentJSONFile, &customIntentJSON)
 			fmt.Println("Number of custom intents (current): " + strconv.Itoa(len(customIntentJSON)))
 			customIntentJSON = append(customIntentJSON, struct {
@@ -50,17 +50,11 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 				ParamName  string `json:"paramname"`
 				ParamValue string `json:"paramvalue"`
 			}{ParamName: paramName, ParamValue: paramValue}, Exec: exec, ExecArgs: strings.Split(execArgs, ",")})
-			customIntentJSONFile, err = json.Marshal(customIntentJSON)
-			if err != nil {
-				fmt.Println(err)
-			}
-			err = ioutil.WriteFile("./customIntents.json", customIntentJSONFile, 0644)
-			if err != nil {
-				fmt.Println(err)
-			}
+			customIntentJSONFile, _ = json.Marshal(customIntentJSON)
+			ioutil.WriteFile("./customIntents.json", customIntentJSONFile, 0644)
 		} else {
 			fmt.Println("Creating customIntents.json")
-			customIntentJSONFile, err := json.Marshal([]struct {
+			customIntentJSONFile, _ := json.Marshal([]struct {
 				Name        string   `json:"name"`
 				Description string   `json:"description"`
 				Utterances  []string `json:"utterances"`
@@ -75,13 +69,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 				ParamName  string `json:"paramname"`
 				ParamValue string `json:"paramvalue"`
 			}{ParamName: paramName, ParamValue: paramValue}, Exec: exec, ExecArgs: strings.Split(execArgs, ",")}})
-			if err != nil {
-				fmt.Println(err)
-			}
-			err = ioutil.WriteFile("./customIntents.json", customIntentJSONFile, 0644)
-			if err != nil {
-				fmt.Println(err)
-			}
+			ioutil.WriteFile("./customIntents.json", customIntentJSONFile, 0644)
 		}
 		fmt.Fprintf(w, "intent added successfully")
 		return
@@ -115,7 +103,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 		}
 		json.Unmarshal(customIntentJSONFile, &customIntentJSON)
-		newNumbera, err := strconv.Atoi(number)
+		newNumbera, _ := strconv.Atoi(number)
 		newNumber := newNumbera - 1
 		if newNumber > len(customIntentJSON) {
 			fmt.Fprintf(w, "err: there are only "+strconv.Itoa(len(customIntentJSON))+" intents")
@@ -145,11 +133,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		if execArgs != "" {
 			customIntentJSON[newNumber].ExecArgs = strings.Split(execArgs, ",")
 		}
-		newCustomIntentJSONFile, err := json.Marshal(customIntentJSON)
-		err = ioutil.WriteFile("./customIntents.json", newCustomIntentJSONFile, 0644)
-		if err != nil {
-			fmt.Println(err)
-		}
+		newCustomIntentJSONFile, _ := json.Marshal(customIntentJSON)
+		ioutil.WriteFile("./customIntents.json", newCustomIntentJSONFile, 0644)
 		fmt.Fprintf(w, "intent edited successfully")
 		return
 	case r.URL.Path == "/api/get_custom_intents_json":
@@ -163,7 +148,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Fprintf(w, string(customIntentJSONFile))
+		fmt.Fprint(w, string(customIntentJSONFile))
 		return
 	case r.URL.Path == "/api/remove_custom_intent":
 		number := r.FormValue("number")
@@ -183,18 +168,15 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 		}
 		json.Unmarshal(customIntentJSONFile, &customIntentJSON)
-		newNumbera, err := strconv.Atoi(number)
+		newNumbera, _ := strconv.Atoi(number)
 		newNumber := newNumbera - 1
 		if newNumber > len(customIntentJSON) {
 			fmt.Fprintf(w, "err: there are only "+strconv.Itoa(len(customIntentJSON))+" intents")
 			return
 		}
 		customIntentJSON = append(customIntentJSON[:newNumber], customIntentJSON[newNumber+1:]...)
-		newCustomIntentJSONFile, err := json.Marshal(customIntentJSON)
-		err = ioutil.WriteFile("./customIntents.json", newCustomIntentJSONFile, 0644)
-		if err != nil {
-			fmt.Println(err)
-		}
+		newCustomIntentJSONFile, _ := json.Marshal(customIntentJSON)
+		ioutil.WriteFile("./customIntents.json", newCustomIntentJSONFile, 0644)
 		fmt.Fprintf(w, "intent removed successfully")
 		return
 	case r.URL.Path == "/api/add_bot":
@@ -217,7 +199,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "err: units must be either F or C")
 			return
 		}
-		firmware1, err := strconv.Atoi(firmwareSplit[0])
+		firmware1, _ := strconv.Atoi(firmwareSplit[0])
 		firmware2, err := strconv.Atoi(firmwareSplit[1])
 		if err != nil {
 			fmt.Fprintf(w, "err: firmware prefix must be in the format: 1.5")
@@ -258,11 +240,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 				UsePlaySpecific bool   `json:"use_play_specific"`
 				IsEarlyOpus     bool   `json:"is_early_opus"`
 			}{Esn: botESN, Location: botLocation, Units: botUnits, UsePlaySpecific: use_play_specific, IsEarlyOpus: is_early_opus})
-			newBotConfigJSONFile, err := json.Marshal(botConfig)
-			err = ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
-			if err != nil {
-				fmt.Println(err)
-			}
+			newBotConfigJSONFile, _ := json.Marshal(botConfig)
+			ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
 		} else {
 			botConfig = append(botConfig, struct {
 				Esn             string `json:"esn"`
@@ -271,11 +250,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 				UsePlaySpecific bool   `json:"use_play_specific"`
 				IsEarlyOpus     bool   `json:"is_early_opus"`
 			}{Esn: botESN, Location: botLocation, Units: botUnits, UsePlaySpecific: use_play_specific, IsEarlyOpus: is_early_opus})
-			newBotConfigJSONFile, err := json.Marshal(botConfig)
-			err = ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
-			if err != nil {
-				fmt.Println(err)
-			}
+			newBotConfigJSONFile, _ := json.Marshal(botConfig)
+			ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
 		}
 		fmt.Fprintf(w, "bot added successfully")
 		return
@@ -300,7 +276,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 		}
 		json.Unmarshal(botConfigJSONFile, &botConfigJSON)
-		newNumbera, err := strconv.Atoi(number)
+		newNumbera, _ := strconv.Atoi(number)
 		newNumber := newNumbera - 1
 		if newNumber > len(botConfigJSON) {
 			fmt.Fprintf(w, "err: there are only "+strconv.Itoa(len(botConfigJSON))+" bots")
@@ -308,11 +284,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(botConfigJSON[newNumber].Esn + " bot is being removed")
 		botConfigJSON = append(botConfigJSON[:newNumber], botConfigJSON[newNumber+1:]...)
-		newBotConfigJSONFile, err := json.Marshal(botConfigJSON)
-		err = ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
-		if err != nil {
-			fmt.Println(err)
-		}
+		newBotConfigJSONFile, _ := json.Marshal(botConfigJSON)
+		ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
 		fmt.Fprintf(w, "bot removed successfully")
 		return
 	case r.URL.Path == "/api/edit_bot":
@@ -336,7 +309,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		var is_early_opus bool
 		var use_play_specific bool
-		firmware1, err := strconv.Atoi(firmwareSplit[0])
+		firmware1, _ := strconv.Atoi(firmwareSplit[0])
 		firmware2, err := strconv.Atoi(firmwareSplit[1])
 		if err != nil {
 			fmt.Fprintf(w, "err: firmware prefix must be in the format: 1.5")
@@ -370,18 +343,15 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err)
 			}
 			json.Unmarshal(botConfigFile, &botConfig)
-			newNumbera, err := strconv.Atoi(number)
+			newNumbera, _ := strconv.Atoi(number)
 			newNumber := newNumbera - 1
 			botConfig[newNumber].Esn = botESN
 			botConfig[newNumber].Location = botLocation
 			botConfig[newNumber].Units = botUnits
 			botConfig[newNumber].UsePlaySpecific = use_play_specific
 			botConfig[newNumber].IsEarlyOpus = is_early_opus
-			newBotConfigJSONFile, err := json.Marshal(botConfig)
-			err = ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
-			if err != nil {
-				fmt.Println(err)
-			}
+			newBotConfigJSONFile, _ := json.Marshal(botConfig)
+			ioutil.WriteFile("./botConfig.json", newBotConfigJSONFile, 0644)
 		} else {
 			fmt.Fprintln(w, "err: you must create a bot first")
 			return
@@ -399,7 +369,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Fprintf(w, string(botConfigJSONFile))
+		fmt.Fprint(w, string(botConfigJSONFile))
 		return
 	}
 }

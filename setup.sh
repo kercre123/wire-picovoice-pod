@@ -425,10 +425,10 @@ function scpToBot() {
       exit 0
    fi
    ssh -i ${keyPath} root@${botAddress} "mount -o rw,remount / && systemctl stop vic-cloud && mv /anki/data/assets/cozmo_resources/config/server_config.json /anki/data/assets/cozmo_resources/config/server_config.json.bak"
-   scp -i ${keyPath} ./vector-cloud/build/vic-cloud root@${botAddress}:/anki/bin/
-   scp -i ${keyPath} ./vector-cloud/weather_weathercompany.json root@${botAddress}:/anki/data/assets/cozmo_resources/config/engine/behaviorComponent/weather/weatherResponseMaps/
-   scp -i ${keyPath} ./certs/server_config.json root@${botAddress}:/anki/data/assets/cozmo_resources/config/
-   scp -i ${keyPath} ./certs/cert.crt root@${botAddress}:/data/data/customCaCert.crt
+   scp -O -i ${keyPath} ./vector-cloud/build/vic-cloud root@${botAddress}:/anki/bin/
+   scp -O -i ${keyPath} ./vector-cloud/weather_weathercompany.json root@${botAddress}:/anki/data/assets/cozmo_resources/config/engine/behaviorComponent/weather/weatherResponseMaps/
+   scp -O -i ${keyPath} ./certs/server_config.json root@${botAddress}:/anki/data/assets/cozmo_resources/config/
+   scp -O -i ${keyPath} ./certs/cert.crt root@${botAddress}:/data/data/customCaCert.crt
    ssh -i ${keyPath} root@${botAddress} "chmod +rwx /anki/data/assets/cozmo_resources/config/server_config.json /anki/bin/vic-cloud /data/data/customCaCert.crt && systemctl start vic-cloud"
    rm -f /tmp/sshTest
    echo

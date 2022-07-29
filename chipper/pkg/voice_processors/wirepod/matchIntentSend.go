@@ -40,9 +40,9 @@ func IntentPass(req *vtt.IntentRequest, intentThing string, speechText string, i
 	r := &vtt.IntentResponse{
 		Intent: &intent,
 	}
-	if debugLogging == true {
+	if debugLogging {
 		fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " Intent Sent: " + intentThing)
-		if isParam == true {
+		if isParam {
 			fmt.Println("Bot "+strconv.Itoa(justThisBotNum)+" Parameters Sent:", intentParams)
 		} else {
 			fmt.Println("No Parameters Sent")
@@ -60,13 +60,13 @@ func customIntentHandler(req *vtt.IntentRequest, voiceText string, intentList []
 		for _, c := range customIntentJSON {
 			for _, v := range c.Utterances {
 				if strings.Contains(voiceText, v) {
-					if debugLogging == true {
+					if debugLogging {
 						fmt.Println("Custom Intent Matched: " + c.Name + " - " + c.Description + " - " + c.Intent)
 					}
 					var intentParams map[string]string
 					var isParam bool = false
 					if c.Params.ParamValue != "" {
-						if debugLogging == true {
+						if debugLogging {
 							fmt.Println("Custom Intent Parameter: " + c.Params.ParamName + " - " + c.Params.ParamValue)
 						}
 						intentParams = map[string]string{c.Params.ParamName: c.Params.ParamValue}
@@ -81,12 +81,12 @@ func customIntentHandler(req *vtt.IntentRequest, voiceText string, intentList []
 					}
 					var customIntentExec *exec.Cmd
 					if len(args) == 0 {
-						if debugLogging == true {
+						if debugLogging {
 							fmt.Println("Executing: " + c.Exec)
 						}
 						customIntentExec = exec.Command(c.Exec)
 					} else {
-						if debugLogging == true {
+						if debugLogging {
 							fmt.Println("Executing: " + c.Exec + " " + strings.Join(args, " "))
 						}
 						customIntentExec = exec.Command(c.Exec, args...)
@@ -95,14 +95,14 @@ func customIntentHandler(req *vtt.IntentRequest, voiceText string, intentList []
 					if err != nil {
 						fmt.Println(err)
 					}
-					if debugLogging == true {
+					if debugLogging {
 						fmt.Println("Custom Intent Exec Output: " + strings.TrimSpace(string(customOut)))
 					}
 					IntentPass(req, c.Intent, voiceText, intentParams, isParam, justThisBotNum)
 					successMatched = true
 					break
 				}
-				if successMatched == true {
+				if successMatched {
 					break
 				}
 			}
@@ -120,11 +120,11 @@ func processTextAll(req *vtt.IntentRequest, voiceText string, listOfLists [][]st
 	var intentNum int = 0
 	var successMatched bool = false
 	customIntentMatched := customIntentHandler(req, voiceText, intentList, isOpus, justThisBotNum)
-	if customIntentMatched == false {
+	if !customIntentMatched {
 		for _, b := range listOfLists {
 			for _, c := range b {
 				if strings.Contains(voiceText, c) {
-					if isOpus == true {
+					if isOpus {
 						paramChecker(req, intentList[intentNum], voiceText, justThisBotNum)
 					} else {
 						prehistoricParamChecker(req, intentList[intentNum], voiceText, justThisBotNum)

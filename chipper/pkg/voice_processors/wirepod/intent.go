@@ -14,19 +14,19 @@ func (s *Server) ProcessIntent(req *vtt.IntentRequest) (*vtt.IntentResponse, err
 		IntentPass(req, "intent_system_noaudio", "voice processing error", map[string]string{"error": err.Error()}, true, justThisBotNum)
 		return nil, nil
 	}
-	if isRhino == true {
+	if isRhino {
 		successMatched = true
 		paramCheckerSlots(req, transcribedText, transcribedSlots, isOpus, justThisBotNum)
 	} else {
 		successMatched = processTextAll(req, transcribedText, matchListList, intentsList, isOpus, justThisBotNum)
 	}
-	if successMatched == false {
-		if debugLogging == true {
+	if !successMatched {
+		if debugLogging {
 			fmt.Println("No intent was matched.")
 		}
 		IntentPass(req, "intent_system_noaudio", transcribedText, map[string]string{"": ""}, false, justThisBotNum)
 	}
-	if debugLogging == true {
+	if debugLogging {
 		fmt.Println("Bot " + strconv.Itoa(justThisBotNum) + " request served.")
 	}
 	return nil, nil

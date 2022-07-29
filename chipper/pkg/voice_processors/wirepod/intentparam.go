@@ -39,7 +39,7 @@ func paramCheckerSlots(req *vtt.IntentRequest, intent string, slots map[string]s
 		json.Unmarshal(byteValue, &botConfig)
 		for _, bot := range botConfig {
 			if strings.ToLower(bot.ESN) == req.Device {
-				if debugLogging == true {
+				if debugLogging {
 					fmt.Println("Found bot config for " + bot.ESN)
 				}
 				botLocation = bot.Location
@@ -123,7 +123,7 @@ func paramCheckerSlots(req *vtt.IntentRequest, intent string, slots map[string]s
 				timerSecs = timerSecs * 60 * 60
 			}
 		}
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("Seconds parsed from speech: " + strconv.Itoa(timerSecs))
 		}
 		intentParam = "timer_duration"
@@ -155,7 +155,7 @@ func paramCheckerSlots(req *vtt.IntentRequest, intent string, slots map[string]s
 			intentParams = map[string]string{intentParam: intentParamValue}
 		}
 	}
-	if isOpus == false || botIsEarlyOpus == true || botPlaySpecific == true {
+	if isOpus || botIsEarlyOpus || botPlaySpecific {
 		if strings.Contains(intent, "intent_play_blackjack") {
 			isParam = true
 			newIntent = "intent_play_specific_extend"
@@ -225,7 +225,7 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 		json.Unmarshal(byteValue, &botConfig)
 		for _, bot := range botConfig {
 			if strings.ToLower(bot.ESN) == req.Device {
-				if debugLogging == true {
+				if debugLogging {
 					fmt.Println("Found bot config for " + bot.ESN)
 				}
 				botLocation = bot.Location
@@ -235,7 +235,7 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 			}
 		}
 	}
-	if botPlaySpecific == true {
+	if botPlaySpecific {
 		if strings.Contains(intent, "intent_play_blackjack") {
 			isParam = true
 			newIntent = "intent_play_specific_extend"
@@ -367,14 +367,14 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 			} else if len(splitPhrase) > 4 {
 				username = username + " " + strings.TrimSpace(splitPhrase[2]) + " " + strings.TrimSpace(splitPhrase[3])
 			}
-			if debugLogging == true {
+			if debugLogging {
 				fmt.Println("Name parsed from speech: " + "`" + username + "`")
 			}
 			intentParam = "username"
 			intentParamValue = username
 			intentParams = map[string]string{intentParam: intentParamValue}
 		} else {
-			if debugLogging == true {
+			if debugLogging {
 				fmt.Println("No name parsed from speech")
 			}
 			intentParam = "username"
@@ -385,7 +385,7 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 		isParam = true
 		newIntent = intent
 		timerSecs := words2num(speechText)
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("Seconds parsed from speech: " + timerSecs)
 		}
 		intentParam = "timer_duration"
@@ -446,7 +446,7 @@ func paramChecker(req *vtt.IntentRequest, intent string, speechText string, just
 			intentParams = map[string]string{intentParam: intentParamValue}
 		}
 	}
-	if botIsEarlyOpus == true {
+	if botIsEarlyOpus {
 		if strings.Contains(intent, "intent_imperative_praise") {
 			isParam = false
 			newIntent = "intent_imperative_affirmative"
@@ -499,7 +499,7 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 		json.Unmarshal(byteValue, &botConfig)
 		for _, bot := range botConfig {
 			if strings.ToLower(bot.ESN) == req.Device {
-				if debugLogging == true {
+				if debugLogging {
 					fmt.Println("Found bot config for " + bot.ESN)
 				}
 				botLocation = bot.Location
@@ -595,14 +595,14 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 			} else if len(splitPhrase) > 4 {
 				username = username + " " + strings.TrimSpace(splitPhrase[2]) + " " + strings.TrimSpace(splitPhrase[3])
 			}
-			if debugLogging == true {
+			if debugLogging {
 				fmt.Println("Name parsed from speech: " + "`" + username + "`")
 			}
 			intentParam = "username"
 			intentParamValue = username
 			intentParams = map[string]string{intentParam: intentParamValue}
 		} else {
-			if debugLogging == true {
+			if debugLogging {
 				fmt.Println("No name parsed from speech")
 			}
 			intentParam = "username"
@@ -613,7 +613,7 @@ func prehistoricParamChecker(req *vtt.IntentRequest, intent string, speechText s
 		isParam = true
 		newIntent = "intent_clock_settimer"
 		timerSecs := words2num(speechText)
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("Seconds parsed from speech: " + timerSecs)
 		}
 		intentParam = "timer_duration"

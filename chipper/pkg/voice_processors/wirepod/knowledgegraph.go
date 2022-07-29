@@ -42,7 +42,7 @@ func InitHoundify() {
 			fmt.Println("Houndify Client Key not provided.")
 			houndEnable = false
 		}
-		if houndEnable == true {
+		if houndEnable {
 			hclient = houndify.Client{
 				ClientID:  os.Getenv("HOUNDIFY_CLIENT_ID"),
 				ClientKey: os.Getenv("HOUNDIFY_CLIENT_KEY"),
@@ -59,14 +59,14 @@ var NoResult string = "NoResultCommand"
 var NoResultSpoken string
 
 func knowledgeAPI(spokenText string, req *vtt.KnowledgeGraphRequest) string {
-	if houndEnable == true {
+	if houndEnable {
 		hReq := houndify.TextRequest{
 			Query:             spokenText,
 			UserID:            req.Device,
 			RequestID:         req.Session,
 			RequestInfoFields: make(map[string]interface{}),
 		}
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("Making request to Houndify...")
 		}
 		serverResponse, err := hclient.TextSearch(hReq)
@@ -77,7 +77,7 @@ func knowledgeAPI(spokenText string, req *vtt.KnowledgeGraphRequest) string {
 		if err != nil {
 			fmt.Println(err)
 		}
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("Houndify Response: " + robotWords)
 		}
 		return robotWords
@@ -104,12 +104,8 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 		return &vtt.KnowledgeGraphResponse{
 			Intent: &kg,
 		}, nil
-		return nil, nil
 	}
-	transcribedText, transcribedSlots, isRhino, justThisBotNum, isOpus, err := sttHandler(req, true)
-	if transcribedSlots == nil && isRhino == false && isOpus == false {
-		// don't do anything
-	}
+	transcribedText, _, _, justThisBotNum, _, err := sttHandler(req, true)
 	if err != nil {
 		fmt.Println(err)
 		NoResultSpoken = err.Error()
@@ -125,7 +121,6 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 		return &vtt.KnowledgeGraphResponse{
 			Intent: &kg,
 		}, nil
-		return nil, nil
 	}
 	NoResultSpoken = knowledgeAPI(transcribedText, req)
 	kg := pb.KnowledgeGraphResponse{
@@ -134,7 +129,7 @@ func (s *Server) ProcessKnowledgeGraph(req *vtt.KnowledgeGraphRequest) (*vtt.Kno
 		CommandType: NoResult,
 		SpokenText:  NoResultSpoken,
 	}
-	if debugLogging == true {
+	if debugLogging {
 		fmt.Println("(KG) Bot " + strconv.Itoa(justThisBotNum) + " request served.")
 	}
 	if err := req.Stream.Send(&kg); err != nil {

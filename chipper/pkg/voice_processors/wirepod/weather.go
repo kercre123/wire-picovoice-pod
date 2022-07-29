@@ -12,18 +12,6 @@ import (
 )
 
 func getWeather(location string, botUnits string) (string, string, string, string, string, string) {
-	/*
-		This is where you would make a call to a weather API to get the weather.
-		You are given `location` which` is the location parsed from the speech
-		which needs to be converted to something your API can understand.
-		You have to return the following:
-		condition = "Cloudy", "Sunny", "Cold", "Rain", "Thunderstorms", or "Windy"
-		is_forecast = "true" or "false"
-		local_datetime = "2022-06-15 12:21:22.123", UTC ISO 8601 date and time
-		speakable_location_string = "New York"
-		temperature = "83", degrees
-		temperature_unit = "F" or "C"
-	*/
 	var weatherEnabled bool
 	var condition string
 	var is_forecast string
@@ -36,40 +24,40 @@ func getWeather(location string, botUnits string) (string, string, string, strin
 	weatherAPIUnit := os.Getenv("WEATHERAPI_UNIT")
 	if weatherAPIEnabled == "true" && weatherAPIKey != "" {
 		weatherEnabled = true
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("Weather API Enabled")
 		}
 	} else {
 		weatherEnabled = false
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("Weather API not enabled, using placeholder")
 			if weatherAPIEnabled == "true" && weatherAPIKey == "" {
 				fmt.Println("Weather API enabled, but Weather API key not set")
 			}
 		}
 	}
-	if weatherEnabled == true {
+	if weatherEnabled {
 		if botUnits != "" {
 			if botUnits == "F" {
-				if debugLogging == true {
+				if debugLogging {
 					fmt.Println("Weather units set to F")
 				}
 				weatherAPIUnit = "F"
 			} else if botUnits == "C" {
-				if debugLogging == true {
+				if debugLogging {
 					fmt.Println("Weather units set to C")
 				}
 				weatherAPIUnit = "C"
 			}
 		} else if weatherAPIUnit != "F" && weatherAPIUnit != "C" {
-			if debugLogging == true {
+			if debugLogging {
 				fmt.Println("Weather API unit not set, using F")
 			}
 			weatherAPIUnit = "F"
 		}
 	}
 
-	if weatherEnabled == true {
+	if weatherEnabled {
 		params := url.Values{}
 		params.Add("key", weatherAPIKey)
 		params.Add("q", location)
@@ -82,7 +70,7 @@ func getWeather(location string, botUnits string) (string, string, string, strin
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
 		weatherResponse := string(body)
-		//if debugLogging == true {
+		//if debugLogging {
 		//	fmt.Println(weatherResponse)
 		//}
 		type weatherAPIResponseStruct struct {
@@ -140,17 +128,17 @@ func weatherParser(speechText string, botLocation string, botUnits string) (stri
 		} else if len(splitPhrase) > 4 {
 			speechLocation = speechLocation + " " + strings.TrimSpace(splitPhrase[2]) + " " + strings.TrimSpace(splitPhrase[3])
 		}
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("Location parsed from speech: " + "`" + speechLocation + "`")
 		}
 		specificLocation = true
 	} else {
-		if debugLogging == true {
+		if debugLogging {
 			fmt.Println("No location parsed from speech")
 		}
 		specificLocation = false
 	}
-	if specificLocation == true {
+	if specificLocation {
 		apiLocation = speechLocation
 	} else {
 		apiLocation = botLocation
